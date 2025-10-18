@@ -3,7 +3,11 @@ import ky from 'ky';
 import { api } from '../api';
 import { useAuth } from '../context/auth';
 
-const prefixUrl = '/api/';
+const prefixUrl =
+  import.meta.env.MODE === 'development'
+    ? '/api/'
+    : import.meta.env.VITE_API_URL?.replace(/\/$/, '') + '/';
+
 type ApiMethod = keyof ReturnType<typeof api>;
 
 export const useApi = <T extends ApiMethod>(method: T) => {
