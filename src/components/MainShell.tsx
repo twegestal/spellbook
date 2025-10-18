@@ -1,27 +1,27 @@
-import { type FC, useState, useMemo } from 'react';
+import { type FC, useState, useMemo, useRef } from 'react';
 import {
   Box,
   Stack,
-  Icon,
   IconButton,
   Text,
-  Card,
-  HStack,
-  Badge,
   Input,
   InputGroup,
 } from '@chakra-ui/react';
 import { Menu, X } from 'lucide-react';
 import { LuSearch } from 'react-icons/lu';
-import { CiCirclePlus } from 'react-icons/ci';
 import { MainDrawer } from './MainDrawer';
 import { useSpells } from '../hooks/useSpell';
 import type { Spell } from '../types/spells';
+import { SpellListItem } from './SpellListItem';
+import { spellDialog } from './overlays/SpellDialog';
+import { SpellOverlayContent } from './SpellOverLayContent';
 
 export const MainShell: FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [query, setQuery] = useState('');
   const { data } = useSpells();
+
+  const shellRef = useRef<HTMLDivElement>(null);
 
   const sorted = useMemo<Spell[]>(
     () =>
@@ -42,7 +42,7 @@ export const MainShell: FC = () => {
   }, [sorted, query]);
 
   return (
-    <Stack minH="100dvh" gap={0}>
+    <Stack ref={shellRef} minH="100dvh" gap={0}>
       <Box
         h="56px"
         px={3}
@@ -87,21 +87,17 @@ export const MainShell: FC = () => {
         {spells?.length ? (
           <Stack as="ul" gap={3}>
             {spells.map((spell) => (
-              <Card.Root size="sm" key={spell.index}>
-                <Card.Body color="fg.muted">
-                  <HStack justifyContent={'space-between'}>
-                    <HStack>
-                      <Icon size={'lg'}>
-                        <CiCirclePlus />
-                      </Icon>
-                      <Text>{spell.name}</Text>
-                    </HStack>
-                    <Badge colorPalette="purple">
-                      {spell.level === 0 ? 'cantrip' : spell.level}
-                    </Badge>
-                  </HStack>
-                </Card.Body>
-              </Card.Root>
+              <SpellListItem
+                key={spell.index}
+                spell={spell}
+                onOpenDetails={() =>
+                  spellDialog.open(spell.index ?? spell.name, {
+                    title: spell.name,
+                    content: <SpellOverlayContent spell={spell} />,
+                    container: shellRef,
+                  })
+                }
+              />
             ))}
           </Stack>
         ) : (
@@ -112,6 +108,7 @@ export const MainShell: FC = () => {
       </Box>
 
       <MainDrawer open={drawerOpen} onOpenChange={setDrawerOpen} />
+      <spellDialog.Viewport />
     </Stack>
   );
 };
