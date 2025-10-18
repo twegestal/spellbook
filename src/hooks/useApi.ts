@@ -6,7 +6,7 @@ import { useAuth } from '../context/auth';
 const prefixUrl =
   import.meta.env.MODE === 'development'
     ? '/api/'
-    : import.meta.env.VITE_API_URL?.replace(/\/$/, '') + '/';
+    : import.meta.env.VITE_API_URL?.replace(/\/$/, '') + '/api';
 
 type ApiMethod = keyof ReturnType<typeof api>;
 
