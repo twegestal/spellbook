@@ -1,0 +1,15 @@
+export const DAMAGE_TYPE_COLORS: Record<string, string> = {
+  acid: 'green',
+  bludgeoning: 'gray',
+  cold: 'cyan',
+  fire: 'red',
+  force: 'pink',
+  lightning: 'blue',
+  necrotic: 'purple',
+  piercing: 'gray',
+  poison: 'lime',
+  psychic: 'fuchsia',
+  radiant: 'yellow',
+  slashing: 'gray',
+  thunder: 'indigo',
+};

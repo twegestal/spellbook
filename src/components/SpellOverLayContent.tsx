@@ -3,6 +3,7 @@ import type { Spell } from '../types/spells';
 import { Box, Stack, Text, Badge, Separator } from '@chakra-ui/react';
 import type { FC, ReactNode } from 'react';
 import { LoadingSpinner } from './overlays/LoadingSpinner';
+import { DAMAGE_TYPE_COLORS } from '../util/damageColors';
 
 type Props = { spell: Spell };
 
@@ -50,6 +51,11 @@ export const SpellOverlayContent: FC<Props> = ({ spell }) => {
   const components = Array.isArray(data.components) ? data.components : [];
   const classes = Array.isArray(data.classes) ? data.classes : [];
   const desc = Array.isArray(data.desc) ? data.desc : [];
+  const higherLevelDesc = Array.isArray(data.higher_level)
+    ? data.higher_level
+    : [];
+  const savingThrow = data.dc?.dc_type?.name;
+  const damageType = data.damage?.damage_type?.name;
 
   return (
     <Stack gap={4}>
@@ -92,12 +98,42 @@ export const SpellOverlayContent: FC<Props> = ({ spell }) => {
         </Field>
       ) : null}
 
+      {/* DC */}
+      {savingThrow ? <Field label="Saving throw">{savingThrow}</Field> : null}
+
+      {/* Damage type */}
+      {damageType ? (
+        <Field label="Damage type">
+          <Badge
+            colorPalette={
+              DAMAGE_TYPE_COLORS[damageType.toLowerCase()] ?? 'gray'
+            }
+          >
+            {damageType}
+          </Badge>
+        </Field>
+      ) : null}
+
       {/* Description */}
       {desc.length ? (
         <>
           <Separator />
           <Stack gap={3}>
             {desc.map((p: string, i: number) => (
+              <Text key={i} whiteSpace="pre-wrap">
+                {p}
+              </Text>
+            ))}
+          </Stack>
+        </>
+      ) : null}
+
+      {/* Higher level description */}
+      {higherLevelDesc.length ? (
+        <>
+          <Separator />
+          <Stack gap={3}>
+            {higherLevelDesc.map((p: string, i: number) => (
               <Text key={i} whiteSpace="pre-wrap">
                 {p}
               </Text>
