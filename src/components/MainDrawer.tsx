@@ -1,20 +1,18 @@
 import { type FC } from 'react';
-import {
-  Drawer,
-  Button,
-  Text,
-  CloseButton,
-  Stack,
-  Box,
-} from '@chakra-ui/react';
+import { Drawer, Button, CloseButton, Stack, Box } from '@chakra-ui/react';
 import { useAuth } from '../context/auth';
 
 type MainDrawerProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onNavigate?: (view: 'spells' | 'characters' | 'filters') => void;
 };
 
-export const MainDrawer: FC<MainDrawerProps> = ({ open, onOpenChange }) => {
+export const MainDrawer: FC<MainDrawerProps> = ({
+  open,
+  onOpenChange,
+  onNavigate,
+}) => {
   const { logout } = useAuth();
 
   return (
@@ -39,7 +37,27 @@ export const MainDrawer: FC<MainDrawerProps> = ({ open, onOpenChange }) => {
           </Drawer.Header>
 
           <Drawer.Body flex="1" overflowY="auto">
-            <Text mb={4}>Spells, Classes, Bookmarks — coming soon.</Text>
+            <Stack gap={3}>
+              <Button
+                variant="subtle"
+                onClick={() => {
+                  console.log('open spell filters');
+                  onNavigate?.('filters');
+                  onOpenChange(false);
+                }}
+              >
+                Filter spells
+              </Button>
+              <Button
+                variant="subtle"
+                onClick={() => {
+                  onNavigate?.('characters');
+                  onOpenChange(false);
+                }}
+              >
+                Characters
+              </Button>
+            </Stack>
           </Drawer.Body>
 
           <Drawer.Footer p={0}>
