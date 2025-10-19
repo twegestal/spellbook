@@ -52,7 +52,7 @@ export const CharactersPage = () => {
   }
 
   return (
-    <Stack gap={0} minH="100dvh">
+    <Stack gap={0}>
       <CharacterTopBar onCreate={handleCreateCharacter} />
 
       <Stack gap={4} py={4} px={3}>

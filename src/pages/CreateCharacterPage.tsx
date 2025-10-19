@@ -54,7 +54,7 @@ export const CreateCharacterPage = () => {
         items:
           racesData?.map((r) => ({
             label: r.name,
-            value: r.index,
+            value: r.name,
             category: 'Races',
           })) ?? [],
       }),
@@ -67,7 +67,7 @@ export const CreateCharacterPage = () => {
         items:
           classesData?.map((c) => ({
             label: c.name,
-            value: c.index,
+            value: c.name,
             category: 'Classes',
           })) ?? [],
       }),
@@ -104,18 +104,11 @@ export const CreateCharacterPage = () => {
     <>
       {isPending && <LoadingOverlay />}
 
-      <Box
-        px={4}
-        py={6}
-        // Reserve space for the BottomNav (≈64px) + safe area
-        pb={`calc(72px + env(safe-area-inset-bottom))`}
-      >
-        <Stack minH="100dvh" justify="space-between">
-          {/* Stack 1: all the form content */}
+      <Box px={4} py={6} pb={`calc(72px + env(safe-area-inset-bottom))`}>
+        <Stack justify="space-between">
           <Stack gap={5} maxW="400px" mx="auto" w="100%">
             <Heading size="md">Create Character</Heading>
 
-            {/* Name */}
             <Stack gap={1}>
               <Text fontSize="sm" color="fg.muted">
                 Name
@@ -132,7 +125,6 @@ export const CreateCharacterPage = () => {
               ) : null}
             </Stack>
 
-            {/* Race */}
             <Stack gap={1}>
               <Text fontSize="sm" color="fg.muted">
                 Race
@@ -176,7 +168,6 @@ export const CreateCharacterPage = () => {
               ) : null}
             </Stack>
 
-            {/* Class */}
             <Stack gap={1}>
               <Text fontSize="sm" color="fg.muted">
                 Class
@@ -220,7 +211,6 @@ export const CreateCharacterPage = () => {
               ) : null}
             </Stack>
 
-            {/* Level */}
             <Stack gap={1}>
               <Text fontSize="sm" color="fg.muted">
                 Level
@@ -230,7 +220,7 @@ export const CreateCharacterPage = () => {
                 max={20}
                 width="200px"
                 value={String(level)}
-                onValueChange={(v: any) =>
+                onValueChange={(v) =>
                   setLevel(Math.max(1, Math.min(20, Number(v?.value) || 1)))
                 }
               >
@@ -251,11 +241,9 @@ export const CreateCharacterPage = () => {
             ) : null}
           </Stack>
 
-          {/* Stack 2: bottom action area */}
           <Stack
             px={0}
             pt={4}
-            // Stick just above the nav; add a subtle background so it doesn’t blend
             position="sticky"
             bottom={`calc(72px + env(safe-area-inset-bottom))`}
             bg="bg"

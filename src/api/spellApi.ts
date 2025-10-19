@@ -1,10 +1,7 @@
-import type { SpellDetail, SpellResponse } from '@/types/spells';
+import type { SpellListResponse } from '../types/spells';
 import ky from 'ky';
 
 export const spellApi = (apiClient: typeof ky) => ({
-  getAllSpells: async (): Promise<SpellResponse> =>
+  getAllSpells: async (): Promise<SpellListResponse> =>
     await apiClient.get('spells').json(),
-
-  getSpellByIndex: async (index: string): Promise<SpellDetail> =>
-    apiClient.get(`spells/${index}`).json(),
 });

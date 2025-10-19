@@ -1,5 +1,5 @@
 import { useMemo, useDeferredValue } from 'react';
-import type { Spell } from '@/types/spells';
+import type { Spell } from '../types/spells';
 
 const collator = new Intl.Collator(undefined, { sensitivity: 'base' });
 

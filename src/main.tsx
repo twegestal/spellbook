@@ -9,7 +9,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from './components/ui/';
 import { App } from './App';
-import { AuthProvider } from './context/auth';
+import { AuthProvider } from './context/AuthProvider';
 
 const queryClient = new QueryClient();
 

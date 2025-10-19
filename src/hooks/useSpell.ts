@@ -8,13 +8,3 @@ export const useSpells = () => {
     queryFn: getAllSpells,
   });
 };
-
-export const useSpellByIndex = (index?: string) => {
-  const getSpellByIndex = useApi('getSpellByIndex');
-  return useAuthedQuery({
-    queryKey: ['spell', index],
-    queryFn: () => getSpellByIndex(index!),
-    enabled: !!index,
-    staleTime: 5 * 60 * 1000,
-  });
-};
