@@ -1,7 +1,7 @@
 import type { RefObject } from 'react';
 import type { Spell } from '@/types/spells';
 import { spellDialog } from './SpellDialog';
-import { SpellOverlayContent } from '../SpellOverlayContent';
+import { SpellOverlayContent } from '../spell/SpellOverlayContent';
 
 export function openSpellDialog(
   spell: Spell,

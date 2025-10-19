@@ -1,9 +1,9 @@
-import { useSpellByIndex } from '../hooks/useSpell';
-import type { Spell } from '../types/spells';
+import { useSpellByIndex } from '../../hooks/useSpell';
+import type { Spell } from '../../types/spells';
 import { Box, Stack, Text, Badge, Separator } from '@chakra-ui/react';
 import type { FC, ReactNode } from 'react';
-import { LoadingSpinner } from './overlays/LoadingSpinner';
-import { DAMAGE_TYPE_COLORS } from '../util/damageColors';
+import { LoadingSpinner } from './../overlays/LoadingSpinner';
+import { DAMAGE_TYPE_COLORS } from '../../util/damageColors';
 
 type Props = { spell: Spell };
 

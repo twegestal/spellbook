@@ -1,4 +1,4 @@
-import type { Spell } from '@/types/spells';
+import type { Spell } from '../../types/spells';
 import { Card, HStack, Text, Badge, IconButton } from '@chakra-ui/react';
 import type { FC, MouseEvent, PointerEvent, KeyboardEvent } from 'react';
 import { CiCirclePlus } from 'react-icons/ci';

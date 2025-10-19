@@ -1,14 +1,19 @@
 import { Box, IconButton, Input, InputGroup } from '@chakra-ui/react';
 import { LuSearch } from 'react-icons/lu';
-import { Menu, X } from 'lucide-react';
+import { X } from 'lucide-react';
+import { IoFilterSharp } from 'react-icons/io5';
 
-type TopBarProps = {
+type SpellsTopBarProps = {
   query: string;
   onQueryChange: (v: string) => void;
   onOpenMenu: () => void;
 };
 
-export function TopBar({ query, onQueryChange, onOpenMenu }: TopBarProps) {
+export function SpellsTopBar({
+  query,
+  onQueryChange,
+  onOpenMenu,
+}: SpellsTopBarProps) {
   return (
     <Box
       h="56px"
@@ -48,7 +53,7 @@ export function TopBar({ query, onQueryChange, onOpenMenu }: TopBarProps) {
         size="lg"
         onClick={onOpenMenu}
       >
-        <Menu />
+        <IoFilterSharp />
       </IconButton>
     </Box>
   );

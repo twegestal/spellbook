@@ -78,7 +78,7 @@ export const LoginPage = () => {
               />
             </Stack>
 
-            <Button type="submit" loading={submitting} colorPalette="blue">
+            <Button type="submit" loading={submitting} colorPalette="purple">
               Sign in
             </Button>
           </Stack>
