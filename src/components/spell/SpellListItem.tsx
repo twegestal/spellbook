@@ -48,7 +48,7 @@ export const SpellListItem: FC<Props> = ({ spell, onOpenDetails }) => {
             <Text>{spell.name}</Text>
           </HStack>
           <Badge colorPalette="purple">
-            {spell.level === 0 ? 'cantrip' : spell.level}
+            {spell.level === 0 ? 'cantrip' : `Level ${spell.level}`}
           </Badge>
         </HStack>
       </Card.Body>

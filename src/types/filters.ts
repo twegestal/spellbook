@@ -7,6 +7,7 @@ export type SpellFilters = {
   savingThrows: Ability[];
   ritual: TriBool;
   concentration: TriBool;
+  schools: string[];
 };
 
 export const emptyFilters: SpellFilters = {
@@ -15,6 +16,7 @@ export const emptyFilters: SpellFilters = {
   savingThrows: [],
   ritual: 'any',
   concentration: 'any',
+  schools: [],
 };
 
 export const getSavingThrow = (spell: any): Ability | undefined => {
@@ -33,4 +35,11 @@ export const triMatch = (tri: TriBool, value: boolean | undefined) => {
   if (tri === 'any') return true;
   if (tri === 'yes') return !!value;
   return !value;
+};
+
+export const spellMatchesSchool = (spell: any, schoolIdxes: string[]) => {
+  if (!schoolIdxes.length) return true;
+  const ix = spell?.school?.index as string | undefined;
+  if (!ix) return false;
+  return schoolIdxes.includes(ix);
 };

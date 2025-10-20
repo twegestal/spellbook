@@ -15,6 +15,7 @@ import {
   emptyFilters,
   getSavingThrow,
   spellHasAnyClass,
+  spellMatchesSchool,
   triMatch,
   type SpellFilters,
 } from '../types/filters';
@@ -31,6 +32,8 @@ export const SpellsPage: FC = () => {
   const filterSpell = useCallback((s: any, f: SpellFilters) => {
     if (f.levels.length && !f.levels.includes(s.level)) return false;
     if (!spellHasAnyClass(s, f.classes)) return false;
+
+    if (!spellMatchesSchool(s, f.schools)) return false;
 
     const st = getSavingThrow(s);
     if (f.savingThrows.length && (!st || !f.savingThrows.includes(st)))

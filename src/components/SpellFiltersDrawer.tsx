@@ -14,7 +14,13 @@ import {
   HStack,
 } from '@chakra-ui/react';
 import type { SpellFilters, TriBool, Ability } from '../types/filters';
-import { LEVELS, ABILITIES, CLASSES, levelLabel } from '../constants/dnd';
+import {
+  LEVELS,
+  ABILITIES,
+  CLASSES,
+  levelLabel,
+  SCHOOLS,
+} from '../constants/dnd';
 
 type Props = {
   open: boolean;
@@ -34,6 +40,7 @@ export const SpellFiltersDrawer: FC<Props> = ({
   const [draft, setDraft] = useState<SpellFilters>(value);
   useEffect(() => setDraft(value), [value, open]);
 
+  // ======= updaters =======
   const setLevels = useCallback(
     (lvl: number, checked: boolean) =>
       setDraft((d) => ({
@@ -44,7 +51,6 @@ export const SpellFiltersDrawer: FC<Props> = ({
       })),
     []
   );
-
   const setClass = useCallback(
     (clsIdx: string, checked: boolean) =>
       setDraft((d) => ({
@@ -55,7 +61,6 @@ export const SpellFiltersDrawer: FC<Props> = ({
       })),
     []
   );
-
   const setSaving = useCallback(
     (ability: Ability, checked: boolean) =>
       setDraft((d) => ({
@@ -66,26 +71,94 @@ export const SpellFiltersDrawer: FC<Props> = ({
       })),
     []
   );
-
   const setRitual = (ritual: TriBool) => setDraft((d) => ({ ...d, ritual }));
   const setConcentration = (concentration: TriBool) =>
     setDraft((d) => ({ ...d, concentration }));
+  const setSchool = useCallback(
+    (schoolIdx: string, checked: boolean) =>
+      setDraft((d) => ({
+        ...d,
+        schools: checked
+          ? [...d.schools, schoolIdx]
+          : d.schools.filter((x) => x !== schoolIdx),
+      })),
+    []
+  );
 
+  // ======= clear helpers (used by the "Clear" badges) =======
+  const clearLevels = useCallback(
+    () => setDraft((d) => ({ ...d, levels: [] })),
+    []
+  );
+  const clearClasses = useCallback(
+    () => setDraft((d) => ({ ...d, classes: [] })),
+    []
+  );
+  const clearSchools = useCallback(
+    () => setDraft((d) => ({ ...d, schools: [] })),
+    []
+  );
+  const clearSaving = useCallback(
+    () => setDraft((d) => ({ ...d, savingThrows: [] })),
+    []
+  );
+  const clearRitual = useCallback(
+    () => setDraft((d) => ({ ...d, ritual: 'any' })),
+    []
+  );
+  const clearConcentration = useCallback(
+    () => setDraft((d) => ({ ...d, concentration: 'any' })),
+    []
+  );
+
+  // ======= counters =======
   const activeCount = useMemo(() => {
-    let c = 0;
-    if (draft.levels.length) c++;
-    if (draft.classes.length) c++;
-    if (draft.savingThrows.length) c++;
-    if (draft.ritual !== 'any') c++;
-    if (draft.concentration !== 'any') c++;
-    return c;
+    const levelCount = new Set(draft.levels).size;
+    const classCount = new Set(draft.classes).size;
+    const saveCount = new Set(draft.savingThrows).size;
+    const schoolCount = new Set(draft.schools).size;
+    const ritualCount = draft.ritual !== 'any' ? 1 : 0;
+    const concentrationCount = draft.concentration !== 'any' ? 1 : 0;
+    return (
+      levelCount +
+      classCount +
+      saveCount +
+      schoolCount +
+      ritualCount +
+      concentrationCount
+    );
   }, [draft]);
 
-  // 🔴 live preview count based on the DRAFT (not yet applied)
   const liveCount = useMemo(
     () => computeMatchingCount(draft),
     [computeMatchingCount, draft]
   );
+
+  // tiny helper to render the right-aligned Clear badge inside triggers
+  const ClearBadge = ({
+    onClear,
+    visible,
+    'aria-label': ariaLabel,
+  }: {
+    onClear: () => void;
+    visible: boolean;
+    'aria-label': string;
+  }) =>
+    !visible ? null : (
+      <Badge
+        as="span"
+        onClick={(e: React.MouseEvent) => {
+          e.stopPropagation(); // don't toggle accordion
+          onClear();
+        }}
+        aria-label={ariaLabel}
+        variant="subtle"
+        colorPalette="purple"
+        cursor="pointer"
+      >
+        Clear
+      </Badge>
+    );
 
   return (
     <Drawer.Root
@@ -119,6 +192,11 @@ export const SpellFiltersDrawer: FC<Props> = ({
                 <Accordion.Item value="levels">
                   <Accordion.ItemTrigger>
                     <Span flex="1">Level</Span>
+                    <ClearBadge
+                      aria-label="Clear level filters"
+                      visible={draft.levels.length > 0}
+                      onClear={clearLevels}
+                    />
                     <Accordion.ItemIndicator />
                   </Accordion.ItemTrigger>
                   <Accordion.ItemContent>
@@ -149,6 +227,11 @@ export const SpellFiltersDrawer: FC<Props> = ({
                 <Accordion.Item value="classes">
                   <Accordion.ItemTrigger>
                     <Span flex="1">Class</Span>
+                    <ClearBadge
+                      aria-label="Clear class filters"
+                      visible={draft.classes.length > 0}
+                      onClear={clearClasses}
+                    />
                     <Accordion.ItemIndicator />
                   </Accordion.ItemTrigger>
                   <Accordion.ItemContent>
@@ -175,10 +258,50 @@ export const SpellFiltersDrawer: FC<Props> = ({
                   </Accordion.ItemContent>
                 </Accordion.Item>
 
+                {/* School */}
+                <Accordion.Item value="school">
+                  <Accordion.ItemTrigger>
+                    <Span flex="1">School</Span>
+                    <ClearBadge
+                      aria-label="Clear school filters"
+                      visible={draft.schools.length > 0}
+                      onClear={clearSchools}
+                    />
+                    <Accordion.ItemIndicator />
+                  </Accordion.ItemTrigger>
+                  <Accordion.ItemContent>
+                    <Accordion.ItemBody>
+                      <HStack gap="3" wrap="wrap">
+                        {SCHOOLS.map((s) => {
+                          const checked = draft.schools.includes(s.index);
+                          return (
+                            <Checkbox.Root
+                              key={s.index}
+                              checked={checked}
+                              onCheckedChange={(e) =>
+                                setSchool(s.index, !!e.checked)
+                              }
+                            >
+                              <Checkbox.HiddenInput />
+                              <Checkbox.Control />
+                              <Checkbox.Label>{s.name}</Checkbox.Label>
+                            </Checkbox.Root>
+                          );
+                        })}
+                      </HStack>
+                    </Accordion.ItemBody>
+                  </Accordion.ItemContent>
+                </Accordion.Item>
+
                 {/* Saving Throw */}
                 <Accordion.Item value="saving">
                   <Accordion.ItemTrigger>
                     <Span flex="1">Saving throw</Span>
+                    <ClearBadge
+                      aria-label="Clear saving throw filters"
+                      visible={draft.savingThrows.length > 0}
+                      onClear={clearSaving}
+                    />
                     <Accordion.ItemIndicator />
                   </Accordion.ItemTrigger>
                   <Accordion.ItemContent>
@@ -211,6 +334,11 @@ export const SpellFiltersDrawer: FC<Props> = ({
                 <Accordion.Item value="ritual">
                   <Accordion.ItemTrigger>
                     <Span flex="1">Ritual</Span>
+                    <ClearBadge
+                      aria-label="Clear ritual filter"
+                      visible={draft.ritual !== 'any'}
+                      onClear={clearRitual}
+                    />
                     <Accordion.ItemIndicator />
                   </Accordion.ItemTrigger>
                   <Accordion.ItemContent>
@@ -243,6 +371,11 @@ export const SpellFiltersDrawer: FC<Props> = ({
                 <Accordion.Item value="concentration">
                   <Accordion.ItemTrigger>
                     <Span flex="1">Concentration</Span>
+                    <ClearBadge
+                      aria-label="Clear concentration filter"
+                      visible={draft.concentration !== 'any'}
+                      onClear={clearConcentration}
+                    />
                     <Accordion.ItemIndicator />
                   </Accordion.ItemTrigger>
                   <Accordion.ItemContent>
@@ -284,6 +417,7 @@ export const SpellFiltersDrawer: FC<Props> = ({
                     savingThrows: [],
                     ritual: 'any',
                     concentration: 'any',
+                    schools: [],
                   })
                 }
               >

@@ -17,5 +17,16 @@ export const CLASSES = [
   { index: 'wizard', name: 'Wizard' },
 ] as const;
 
+export const SCHOOLS = [
+  { index: 'abjuration', name: 'Abjuration' },
+  { index: 'conjuration', name: 'Conjuration' },
+  { index: 'divination', name: 'Divination' },
+  { index: 'enchantment', name: 'Enchantment' },
+  { index: 'evocation', name: 'Evocation' },
+  { index: 'illusion', name: 'Illusion' },
+  { index: 'necromancy', name: 'Necromancy' },
+  { index: 'transmutation', name: 'Transmutation' },
+] as const;
+
 export const levelLabel = (lvl: number) =>
   lvl === 0 ? 'Cantrip' : `Level ${lvl}`;
