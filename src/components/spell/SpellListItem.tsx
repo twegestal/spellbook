@@ -1,14 +1,26 @@
 import type { Spell } from '../../types/spells';
 import { Card, HStack, Text, Badge, IconButton } from '@chakra-ui/react';
-import type { FC, MouseEvent, PointerEvent, KeyboardEvent } from 'react';
+import type {
+  FC,
+  MouseEvent,
+  PointerEvent,
+  KeyboardEvent,
+  RefObject,
+} from 'react';
 import { CiCirclePlus } from 'react-icons/ci';
+import { openAssignSpellDialog } from '../overlays/openAssignSpellDialog';
 
 type Props = {
   spell: Spell;
   onOpenDetails: () => void;
+  overlayContainer?: RefObject<HTMLDivElement | null>;
 };
 
-export const SpellListItem: FC<Props> = ({ spell, onOpenDetails }) => {
+export const SpellListItem: FC<Props> = ({
+  spell,
+  onOpenDetails,
+  overlayContainer,
+}) => {
   const onCardClick = () => onOpenDetails();
 
   const stop = (e: MouseEvent | PointerEvent | KeyboardEvent) => {
@@ -17,8 +29,7 @@ export const SpellListItem: FC<Props> = ({ spell, onOpenDetails }) => {
 
   const onPlusClick = (e: MouseEvent) => {
     e.stopPropagation();
-    // TODO: add-to-list logic here
-    console.log('clicked');
+    if (overlayContainer) openAssignSpellDialog(spell, overlayContainer);
   };
 
   return (

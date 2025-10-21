@@ -1,3 +1,4 @@
+// src/hooks/useCharacters.ts
 import { useAuthedQuery } from './useAuthedQuery';
 import { useApi } from './useApi';
 import type {
@@ -20,6 +21,31 @@ export const useCreateCharacter = () => {
   const createCharacter = useApi('createCharacter');
   return useAuthedMutation<Character, unknown, CreateCharacterInput>({
     mutationFn: createCharacter,
+    invalidateKeys: [['characters']],
+  });
+};
+
+export const useAssignKnownSpell = () => {
+  const assignKnownSpell = useApi('assignKnownSpell');
+  return useAuthedMutation<
+    { character_id: string; spell_id: string; added_at: string },
+    unknown,
+    { characterId: string; spellId: string }
+  >({
+    mutationFn: assignKnownSpell,
+    invalidateKeys: [['characters']],
+  });
+};
+
+export const useRemoveKnownSpell = () => {
+  const removeKnownSpell = useApi('removeKnownSpell');
+  return useAuthedMutation<
+    { ok: true },
+    unknown,
+    { characterId: string; spellId: string }
+  >({
+    mutationFn: ({ characterId, spellId }) =>
+      removeKnownSpell(characterId, spellId),
     invalidateKeys: [['characters']],
   });
 };

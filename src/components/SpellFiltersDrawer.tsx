@@ -1,4 +1,3 @@
-// components/SpellFiltersDrawer.tsx
 import { type FC, useMemo, useState, useEffect, useCallback } from 'react';
 import {
   Drawer,
@@ -40,7 +39,6 @@ export const SpellFiltersDrawer: FC<Props> = ({
   const [draft, setDraft] = useState<SpellFilters>(value);
   useEffect(() => setDraft(value), [value, open]);
 
-  // ======= updaters =======
   const setLevels = useCallback(
     (lvl: number, checked: boolean) =>
       setDraft((d) => ({
@@ -85,7 +83,6 @@ export const SpellFiltersDrawer: FC<Props> = ({
     []
   );
 
-  // ======= clear helpers (used by the "Clear" badges) =======
   const clearLevels = useCallback(
     () => setDraft((d) => ({ ...d, levels: [] })),
     []
@@ -111,7 +108,6 @@ export const SpellFiltersDrawer: FC<Props> = ({
     []
   );
 
-  // ======= counters =======
   const activeCount = useMemo(() => {
     const levelCount = new Set(draft.levels).size;
     const classCount = new Set(draft.classes).size;
@@ -134,7 +130,6 @@ export const SpellFiltersDrawer: FC<Props> = ({
     [computeMatchingCount, draft]
   );
 
-  // tiny helper to render the right-aligned Clear badge inside triggers
   const ClearBadge = ({
     onClear,
     visible,
@@ -148,7 +143,7 @@ export const SpellFiltersDrawer: FC<Props> = ({
       <Badge
         as="span"
         onClick={(e: React.MouseEvent) => {
-          e.stopPropagation(); // don't toggle accordion
+          e.stopPropagation();
           onClear();
         }}
         aria-label={ariaLabel}
@@ -443,7 +438,7 @@ export const SpellFiltersDrawer: FC<Props> = ({
                   w="full"
                   colorPalette="purple"
                   onClick={() => {
-                    onChange(draft); // apply the draft
+                    onChange(draft);
                     onOpenChange(false);
                   }}
                 >

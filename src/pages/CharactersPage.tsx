@@ -1,4 +1,4 @@
-import { Box, Button, Heading, Stack, Text, Separator } from '@chakra-ui/react';
+import { Box, Button, Heading, Stack, Text } from '@chakra-ui/react';
 import { LoadingSpinner } from '../components/overlays/LoadingSpinner';
 import { useCharacters } from '../hooks/useCharacters';
 import { CharacterListItem } from '../components/characters/CharacterListItem';
@@ -56,13 +56,12 @@ export const CharactersPage = () => {
       <CharacterTopBar onCreate={handleCreateCharacter} />
 
       <Stack gap={4} py={4} px={3}>
-        <Separator />
         <Stack as="ul" gap={3}>
           {data.map((c) => (
             <CharacterListItem
               key={c.id}
               character={c}
-              onOpenDetails={() => {
+              onClick={() => {
                 // TODO: open character overlay/details when ready
                 console.log('open details', c.id);
               }}

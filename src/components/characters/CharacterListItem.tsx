@@ -4,15 +4,15 @@ import type { Character } from '../../types/character';
 
 type Props = {
   character: Character;
-  onOpenDetails: () => void;
+  onClick: () => void;
 };
 
-export const CharacterListItem: FC<Props> = ({ character, onOpenDetails }) => {
+export const CharacterListItem: FC<Props> = ({ character, onClick }) => {
   return (
     <Card.Root
       as="li"
       size="sm"
-      onClick={onOpenDetails}
+      onClick={onClick}
       cursor="pointer"
       _active={{ transform: 'scale(0.998)' }}
     >

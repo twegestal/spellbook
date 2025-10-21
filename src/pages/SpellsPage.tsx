@@ -78,6 +78,7 @@ export const SpellsPage: FC = () => {
             <SpellList
               spells={filteredSpells}
               onOpenDetails={(spell) => openSpellDialog(spell, shellRef)}
+              overlayContainer={shellRef}
             />
           </Box>
         </>
