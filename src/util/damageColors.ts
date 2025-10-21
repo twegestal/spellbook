@@ -7,7 +7,7 @@ export const DAMAGE_TYPE_COLORS: Record<string, string> = {
   lightning: 'blue',
   necrotic: 'purple',
   piercing: 'gray',
-  poison: 'lime',
+  poison: 'green',
   psychic: 'fuchsia',
   radiant: 'yellow',
   slashing: 'gray',

@@ -6,7 +6,7 @@ import { useCharacters } from '../../hooks/useCharacters';
 import { LoadingSpinner } from '../overlays/LoadingSpinner';
 import { useNavigate } from 'react-router-dom';
 import { CharacterListItem } from '../characters/CharacterListItem';
-import { useAssignKnownSpell } from '../../hooks/useCharacters';
+import { useAddKnownSpell } from '../../hooks/useCharacters';
 import { toaster } from '../ui';
 import { spellDialog } from '../overlays/SpellDialog';
 
@@ -14,12 +14,12 @@ type Props = { spell: Spell };
 
 export const AssignSpellOverlayContent: FC<Props> = ({ spell }) => {
   const { data, isLoading, isError, error } = useCharacters();
-  const { mutateAsync, isPending } = useAssignKnownSpell();
+  const { mutateAsync, isPending } = useAddKnownSpell();
   const navigate = useNavigate();
 
   const handleCreateCharacter = () => navigate('/characters/new');
 
-  if (isLoading) {
+  if (isLoading || isPending) {
     return (
       <Box minH="100dvh" display="grid" placeItems="center" p={6}>
         <LoadingSpinner />

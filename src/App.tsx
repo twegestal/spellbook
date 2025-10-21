@@ -10,6 +10,7 @@ import { SpellsPage } from './pages/SpellsPage';
 import { CharactersPage } from './pages/CharactersPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { CreateCharacterPage } from './pages/CreateCharacterPage';
+import { CharacterDetailsPage } from './pages/CharacterDetailsPage';
 
 export const App = () => {
   const { user, loading } = useAuth();
@@ -32,6 +33,7 @@ export const App = () => {
         <Route path="/characters" element={<CharactersPage />} />
         <Route path="/characters/new" element={<CreateCharacterPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/characters/:id" element={<CharacterDetailsPage />} />
         <Route path="*" element={<Navigate to="/spells" replace />} />
       </Route>
     </Routes>

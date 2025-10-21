@@ -61,10 +61,7 @@ export const CharactersPage = () => {
             <CharacterListItem
               key={c.id}
               character={c}
-              onClick={() => {
-                // TODO: open character overlay/details when ready
-                console.log('open details', c.id);
-              }}
+              onClick={() => navigate(`/characters/${c.id}`)}
             />
           ))}
         </Stack>

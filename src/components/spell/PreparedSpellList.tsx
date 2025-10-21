@@ -1,19 +1,14 @@
-import { Box, Stack, Text, Separator } from '@chakra-ui/react';
+import { Stack, Box, Text, Separator } from '@chakra-ui/react';
 import type { Spell } from '../../types/spells';
-import { SpellListItem } from './SpellListItem';
-import type { RefObject } from 'react';
+import { PreparedSpellListItem } from './PreparedSpellListItem';
 
-type SpellListProps = {
+type Props = {
   spells: Spell[];
   onOpenDetails: (spell: Spell) => void;
-  overlayContainer?: RefObject<HTMLDivElement | null>;
+  onCast?: (spell: Spell) => void;
 };
 
-export function SpellList({
-  spells,
-  onOpenDetails,
-  overlayContainer,
-}: SpellListProps) {
+export function PreparedSpellList({ spells, onOpenDetails, onCast }: Props) {
   if (!spells.length) {
     return (
       <Box display="grid" placeItems="center" h="full" py={8}>
@@ -21,7 +16,7 @@ export function SpellList({
       </Box>
     );
   }
-
+  
   const groups = spells.reduce((acc, spell) => {
     const lvl = spell.level ?? 0;
     if (!acc[lvl]) acc[lvl] = [];
@@ -51,11 +46,11 @@ export function SpellList({
             {groups[lvl]
               .sort((a, b) => a.name.localeCompare(b.name))
               .map((spell) => (
-                <SpellListItem
+                <PreparedSpellListItem
                   key={spell.index}
                   spell={spell}
                   onOpenDetails={() => onOpenDetails(spell)}
-                  overlayContainer={overlayContainer}
+                  onCast={onCast}
                 />
               ))}
           </Stack>
