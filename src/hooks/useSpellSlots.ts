@@ -18,7 +18,6 @@ export type SpellSlots = SpellSlotsPrepared | SpellSlotsPact;
 
 export function useSpellSlots(characterId: string | undefined) {
   const getSpellSlots = useApi('getSpellSlots');
-
   return useAuthedQuery<any, unknown, SpellSlots>({
     queryKey: ['slots', characterId],
     enabled: !!characterId,

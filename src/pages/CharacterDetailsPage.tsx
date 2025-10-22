@@ -100,6 +100,7 @@ export const CharacterDetailsPage = () => {
         <Tabs.Content value="prepared">
           {preparedSpells && preparedSpells.length > 0 ? (
             <PreparedSpellList
+              characterId={id}
               spells={preparedSpells}
               onOpenDetails={(spell) => openSpellDialog(spell, shellRef)}
               // optional: onCast={(spell) => ...}

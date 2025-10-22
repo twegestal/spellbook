@@ -1,20 +1,17 @@
-/* import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuthedMutation } from './useAuthedMutation';
 import { useApi } from './useApi';
-import type {
-  SpellSlots,
-  SpellSlotsPrepared,
-  SpellSlotsPact,
-} from './useSpellSlots';
+import type { SpellSlots } from './useSpellSlots';
 
 type Vars = {
   characterId: string;
-  slotLevel: number; // 1..9
-  slotIndex: number; // 1..N (N = maximum for that level)
-  // optional: spellId / note if you want to attach a spell later
+  slotLevel: number;
+  slotIndex: number;
   spellId?: string;
   note?: string;
 };
+
+type Ctx = { prev?: SpellSlots };
 
 export function useToggleSpellSlot() {
   const toggleSpellSlot = useApi('toggleSpellSlot');
@@ -28,11 +25,11 @@ export function useToggleSpellSlot() {
       spent: boolean;
     },
     unknown,
-    Vars
+    Vars,
+    Ctx
   >({
     mutationFn: (v) => toggleSpellSlot(v),
 
-    // Optimistic UI for the simple “fill left-to-right” model
     onMutate: async (vars) => {
       const key = ['slots', vars.characterId];
       await qc.cancelQueries({ queryKey: key });
@@ -40,38 +37,28 @@ export function useToggleSpellSlot() {
       const prev = qc.getQueryData<SpellSlots>(key);
       if (!prev) return { prev };
 
-      // make a shallow copy to mutate safely
       let next: SpellSlots = prev;
 
       if (prev.kind === 'prepared') {
         const byLevel = { ...prev.byLevel };
         const row = byLevel[vars.slotLevel];
         if (row) {
-          const spentCount = Math.max(
-            0,
-            Math.min(row.maximum, row.maximum - row.remaining)
-          );
-          const isCurrentlySpent = vars.slotIndex <= spentCount;
-
+          const spentCount = row.maximum - row.remaining;
+          const isBubbleSpent = vars.slotIndex <= spentCount;
           const remaining = Math.max(
             0,
-            Math.min(
-              row.maximum,
-              row.remaining + (isCurrentlySpent ? 1 : -1) // recover -> +1, spend -> -1
-            )
+            Math.min(row.maximum, row.remaining + (isBubbleSpent ? 1 : -1))
           );
-
           byLevel[vars.slotLevel] = { ...row, remaining };
           next = { kind: 'prepared', byLevel };
         }
       } else {
-        // pact
         if (vars.slotLevel === prev.slotLevel) {
           const spentCount = prev.maximum - prev.remaining;
-          const isCurrentlySpent = vars.slotIndex <= spentCount;
+          const isBubbleSpent = vars.slotIndex <= spentCount;
           const remaining = Math.max(
             0,
-            Math.min(prev.maximum, prev.remaining + (isCurrentlySpent ? 1 : -1))
+            Math.min(prev.maximum, prev.remaining + (isBubbleSpent ? 1 : -1))
           );
           next = {
             kind: 'pact',
@@ -87,16 +74,13 @@ export function useToggleSpellSlot() {
     },
 
     onError: (_err, vars, ctx) => {
-      // rollback
       if (ctx?.prev) {
         qc.setQueryData(['slots', vars.characterId], ctx.prev);
       }
     },
 
     onSettled: (_data, _err, vars) => {
-      // final truth from server
       qc.invalidateQueries({ queryKey: ['slots', vars.characterId] });
     },
   });
 }
- */
