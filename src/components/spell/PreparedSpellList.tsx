@@ -1,8 +1,10 @@
+import { useCallback, useMemo, useState } from 'react';
 import { Stack, Box, Text, Separator, HStack } from '@chakra-ui/react';
 import type { Spell } from '../../types/spells';
 import { PreparedSpellListItem } from './PreparedSpellListItem';
 import { useSpellSlots } from '../../hooks/useSpellSlots';
 import { useToggleSpellSlot } from '../../hooks/useToggleSpellSlot';
+import { MagnifiedSlotPicker } from './MagnifiedSlotPicker';
 
 type Props = {
   characterId: string;
@@ -19,6 +21,9 @@ export function PreparedSpellList({
 }: Props) {
   const { data: slots } = useSpellSlots(characterId);
   const toggle = useToggleSpellSlot();
+
+  const [zoom, setZoom] = useState<null | { lvl: number }>(null);
+  const closeZoom = useCallback(() => setZoom(null), []);
 
   if (!spells.length) {
     return (
@@ -39,6 +44,39 @@ export function PreparedSpellList({
     .map(Number)
     .sort((a, b) => a - b);
 
+  const Dot = ({
+    isSpent,
+    onClick,
+  }: {
+    isSpent: boolean;
+    onClick: () => void;
+  }) => (
+    <Box
+      as="button"
+      aria-label="Open slot picker"
+      onClick={onClick}
+      w="18px"
+      h="18px"
+      borderRadius="full"
+      borderWidth="1px"
+      borderColor="purple.800"
+      bg={isSpent ? 'purple.800' : 'transparent'}
+      opacity={isSpent ? 0.95 : 0.75}
+      position="relative"
+      _after={{
+        content: '""',
+        position: 'absolute',
+        inset: '-10px',
+      }}
+      _hover={{
+        boxShadow: '0 0 0 2px rgba(255,255,255,0.15)',
+      }}
+      _active={{
+        transform: 'scale(0.96)',
+      }}
+    />
+  );
+
   const renderDots = (lvl: number) => {
     if (!slots || lvl === 0) return null;
 
@@ -46,30 +84,13 @@ export function PreparedSpellList({
       if (lvl !== slots.slotLevel) return null;
       const max = slots.maximum;
       const spent = max - slots.remaining;
+
       return (
         <HStack gap={1}>
           {Array.from({ length: max }, (_, i) => {
-            const index = i + 1;
             const isSpent = i < spent;
             return (
-              <Box
-                key={i}
-                as="button"
-                aria-label={`Toggle slot ${index}`}
-                onClick={() =>
-                  toggle.mutate({
-                    characterId,
-                    slotLevel: lvl,
-                    slotIndex: index,
-                  })
-                }
-                w="18px"
-                h="18px"
-                borderRadius="full"
-                borderWidth="1px"
-                opacity={isSpent ? 1 : 0.6}
-                bg={isSpent ? 'fg.muted' : 'transparent'}
-              />
+              <Dot key={i} isSpent={isSpent} onClick={() => setZoom({ lvl })} />
             );
           })}
         </HStack>
@@ -84,71 +105,109 @@ export function PreparedSpellList({
     return (
       <HStack gap={1}>
         {Array.from({ length: max }, (_, i) => {
-          const index = i + 1;
           const isSpent = i < spent;
           return (
-            <Box
-              key={i}
-              as="button"
-              aria-label={`Toggle slot ${index}`}
-              onClick={() =>
-                toggle.mutate({
-                  characterId,
-                  slotLevel: lvl,
-                  slotIndex: index,
-                })
-              }
-              w="18px"
-              h="18px"
-              borderRadius="full"
-              borderWidth="1px"
-              opacity={isSpent ? 1 : 0.6}
-              bg={isSpent ? 'fg.muted' : 'transparent'}
-            />
+            <Dot key={i} isSpent={isSpent} onClick={() => setZoom({ lvl })} />
           );
         })}
       </HStack>
     );
   };
 
+  const zoomData = useMemo(() => {
+    if (!zoom || !slots) return null;
+
+    if (slots.kind === 'pact') {
+      if (zoom.lvl !== slots.slotLevel) return null;
+      const maximum = slots.maximum;
+      const spent = maximum - slots.remaining;
+
+      return {
+        levelLabel: `Pact Slots (Lvl ${slots.slotLevel})`,
+        maximum,
+        spent,
+        onToggle: (slotIndex: number) =>
+          toggle.mutate({
+            characterId,
+            slotLevel: zoom.lvl,
+            slotIndex,
+          }),
+      };
+    }
+
+    const row = slots.byLevel[zoom.lvl];
+    if (!row) return null;
+
+    const maximum = row.maximum;
+    const spent = maximum - row.remaining;
+
+    return {
+      levelLabel: `Level ${zoom.lvl}`,
+      maximum,
+      spent,
+      onToggle: (slotIndex: number) =>
+        toggle.mutate({
+          characterId,
+          slotLevel: zoom.lvl,
+          slotIndex,
+        }),
+    };
+  }, [zoom, slots, toggle, characterId]);
+
   return (
-    <Stack as="ul" gap={3}>
-      {sortedLevels.map((lvl, i) => (
-        <Box key={lvl}>
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-            mb={2}
-          >
-            <Text
-              fontWeight="semibold"
-              color="fg.muted"
-              fontSize="xs"
-              textTransform="uppercase"
+    <>
+      <Stack as="ul" gap={3}>
+        {sortedLevels.map((lvl, i) => (
+          <Box key={lvl}>
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+              mb={2}
             >
-              {lvl === 0 ? 'Cantrips' : `Level ${lvl}`}
-            </Text>
+              <Text
+                fontWeight="semibold"
+                color="whiteAlpha.800"
+                fontSize="xs"
+                textTransform="uppercase"
+              >
+                {lvl === 0 ? 'Cantrips' : `Level ${lvl}`}
+              </Text>
 
-            {renderDots(lvl)}
+              {renderDots(lvl)}
+            </Box>
+
+            <Stack gap={3}>
+              {groups[lvl]
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((spell) => (
+                  <PreparedSpellListItem
+                    key={spell.index}
+                    spell={spell}
+                    onOpenDetails={() => onOpenDetails(spell)}
+                    onCast={onCast}
+                  />
+                ))}
+            </Stack>
+
+            {i < sortedLevels.length - 1 && (
+              <Separator my={4} borderColor="whiteAlpha.200" />
+            )}
           </Box>
+        ))}
+      </Stack>
 
-          <Stack gap={3}>
-            {groups[lvl]
-              .sort((a, b) => a.name.localeCompare(b.name))
-              .map((spell) => (
-                <PreparedSpellListItem
-                  key={spell.index}
-                  spell={spell}
-                  onOpenDetails={() => onOpenDetails(spell)}
-                  onCast={onCast}
-                />
-              ))}
-          </Stack>
-
-          {i < sortedLevels.length - 1 && <Separator my={4} />}
-        </Box>
-      ))}
-    </Stack>
+      {zoomData && (
+        <MagnifiedSlotPicker
+          characterId={characterId}
+          isOpen={!!zoom}
+          onClose={closeZoom}
+          levelLabel={zoomData.levelLabel}
+          maximum={zoomData.maximum}
+          spent={zoomData.spent}
+          onToggle={zoomData.onToggle}
+        />
+      )}
+    </>
   );
 }
