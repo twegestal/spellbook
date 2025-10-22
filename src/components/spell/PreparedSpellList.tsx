@@ -2,7 +2,7 @@ import { Stack, Box, Text, Separator, HStack } from '@chakra-ui/react';
 import type { Spell } from '../../types/spells';
 import { PreparedSpellListItem } from './PreparedSpellListItem';
 import { useSpellSlots } from '../../hooks/useSpellSlots';
-import { useToggleSpellSlot } from '../../hooks/useToggleSpellslot';
+import { useToggleSpellSlot } from '../../hooks/useToggleSpellSlot';
 
 type Props = {
   characterId: string;
