@@ -39,7 +39,7 @@ export const CharacterDetailsPage = () => {
   }, [knownSpells]);
 
   const preparedSet = useMemo(
-    () => new Set((preparedSpells ?? []).map((s) => String(s.index))),
+    () => new Set((preparedSpells ?? []).map((s) => String(s.id))),
     [preparedSpells]
   );
 

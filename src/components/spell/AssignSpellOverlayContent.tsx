@@ -58,7 +58,7 @@ export const AssignSpellOverlayContent: FC<Props> = ({ spell }) => {
     );
   }
 
-  const spellIndex = String(spell.index ?? spell.name);
+  const spellIndex = String(spell.id ?? spell.name);
   const dialogId = `assign-${spellIndex}`;
 
   return (

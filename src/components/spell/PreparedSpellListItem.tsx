@@ -19,15 +19,13 @@ export const PreparedSpellListItem: FC<Props> = ({
   const stop = (e: MouseEvent | PointerEvent | KeyboardEvent) =>
     e.stopPropagation();
 
-  const school =
-    typeof spell.school === 'string' ? spell.school : spell.school?.name;
+  const school = spell.school_name;
 
   const handleCast = (e: MouseEvent) => {
     e.stopPropagation();
     if (onCast) {
       onCast(spell);
     } else {
-      console.log(`Cast spell: ${spell.name} (${spell.index})`);
       toaster.create({
         title: 'Cast spell',
         description: `"${spell.name}" cast initiated.`,

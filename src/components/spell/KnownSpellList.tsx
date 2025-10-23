@@ -53,10 +53,10 @@ export function KnownSpellList({
               .sort((a, b) => a.name.localeCompare(b.name))
               .map((spell) => (
                 <KnownSpellListItem
-                  key={spell.index}
+                  key={spell.id}
                   characterId={characterId}
                   spell={spell}
-                  isPrepared={preparedSet.has(String(spell.index))}
+                  isPrepared={preparedSet.has(String(spell.id))}
                   onOpenDetails={() => onOpenDetails(spell)}
                 />
               ))}

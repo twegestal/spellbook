@@ -52,7 +52,7 @@ export function SpellList({
               .sort((a, b) => a.name.localeCompare(b.name))
               .map((spell) => (
                 <SpellListItem
-                  key={spell.index}
+                  key={spell.id}
                   spell={spell}
                   onOpenDetails={() => onOpenDetails(spell)}
                   overlayContainer={overlayContainer}

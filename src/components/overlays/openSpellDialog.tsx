@@ -7,7 +7,7 @@ export function openSpellDialog(
   spell: Spell,
   container: RefObject<HTMLDivElement | null>
 ) {
-  spellDialog.open(spell.index ?? spell.name, {
+  spellDialog.open(spell.id ?? spell.name, {
     title: spell.name,
     content: <SpellOverlayContent spell={spell} />,
     container,

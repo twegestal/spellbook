@@ -7,7 +7,7 @@ export function openAssignSpellDialog(
   spell: Spell,
   container: RefObject<HTMLDivElement | null>
 ) {
-  spellDialog.open(`assign-${spell.index}`, {
+  spellDialog.open(`assign-${spell.id}`, {
     title: `Assign “${spell.name}”`,
     content: <AssignSpellOverlayContent spell={spell} />,
     container,

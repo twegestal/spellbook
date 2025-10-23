@@ -1,4 +1,3 @@
-// src/pages/SpellsPage.tsx
 import { type FC, useMemo, useRef, useState, useCallback } from 'react';
 import { Box, Stack } from '@chakra-ui/react';
 

@@ -19,16 +19,15 @@ const Field = ({ label, children }: { label: string; children: ReactNode }) => (
 export const SpellOverlayContent: FC<Props> = ({ spell }) => {
   const levelLabel =
     spell.level === 0 ? 'Cantrip' : String('Level ' + spell.level);
-  const school =
-    typeof spell.school === 'string' ? spell.school : spell.school?.name;
+  const school = spell.school_name;
   const components = Array.isArray(spell.components) ? spell.components : [];
-  const classes = Array.isArray(spell.classes) ? spell.classes : [];
-  const desc = Array.isArray(spell.desc) ? spell.desc : [];
+  const classes = Array.isArray(spell.class_names) ? spell.class_names : [];
+  const desc = Array.isArray(spell.description) ? spell.description : [];
   const higherLevelDesc = Array.isArray(spell.higher_level)
     ? spell.higher_level
     : [];
-  const savingThrow = spell.dc?.dc_type?.name;
-  const damageType = spell.damage?.damage_type?.name;
+  const savingThrow = spell.dc_type;
+  const damageType = spell.damage_type_name;
 
   return (
     <Stack gap={4}>
@@ -65,7 +64,7 @@ export const SpellOverlayContent: FC<Props> = ({ spell }) => {
       {classes.length ? (
         <Field label="Classes">
           {classes
-            .map((c) => c?.name)
+            .map((c) => c)
             .filter(Boolean)
             .join(', ')}
         </Field>

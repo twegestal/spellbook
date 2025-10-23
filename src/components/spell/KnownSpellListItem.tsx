@@ -25,7 +25,7 @@ export const KnownSpellListItem: FC<Props> = ({
     useRemovePreparedSpell();
 
   const busy = adding || removing;
-  const spellId = String(spell.index);
+  const spellId = String(spell.id);
 
   const onCardClick = () => {
     if (!busy) onOpenDetails();

@@ -14,7 +14,6 @@ type Props = {
 };
 
 export function MagnifiedSlotPicker({
-  characterId,
   onToggle,
   onClose,
   isOpen,

@@ -26,6 +26,8 @@ export const SCHOOLS = [
   { index: 'illusion', name: 'Illusion' },
   { index: 'necromancy', name: 'Necromancy' },
   { index: 'transmutation', name: 'Transmutation' },
+  { index: 'chronurgy', name: 'Chronurgy' },
+  { index: 'dunamancy', name: 'Dunamancy' },
 ] as const;
 
 export const levelLabel = (lvl: number) =>

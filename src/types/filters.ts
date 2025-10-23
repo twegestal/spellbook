@@ -1,3 +1,5 @@
+import type { Spell } from './spells';
+
 export type Ability = 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA';
 export type TriBool = 'any' | 'yes' | 'no';
 
@@ -19,16 +21,25 @@ export const emptyFilters: SpellFilters = {
   schools: [],
 };
 
-export const getSavingThrow = (spell: any): Ability | undefined => {
-  const ix = spell?.dc?.dc_type?.index as string | undefined;
-  if (!ix) return undefined;
-  return ix.toUpperCase() as Ability;
+export const getSavingThrow = (spell: Spell): Ability | undefined => {
+  const ix = spell?.dc_type as string | undefined;
+  return ix ? (ix.toUpperCase() as Ability) : undefined;
 };
 
-export const spellHasAnyClass = (spell: any, classIdxes: string[]) => {
-  if (!classIdxes.length) return true;
-  const inSpell: string[] = (spell.classes ?? []).map((c: any) => c.index);
-  return classIdxes.some((c) => inSpell.includes(c));
+export const spellHasAnyClass = (spell: any, selectedClassNames: string[]) => {
+  if (!selectedClassNames.length) return true;
+
+  const wanted = new Set(selectedClassNames.map((s) => s.trim().toLowerCase()));
+
+  let have: string[] = Array.isArray(spell.class_names)
+    ? spell.class_names
+    : [];
+  if (Array.isArray(spell.class_idxs)) {
+    have = have.concat(spell.class_idxs);
+  }
+
+  const haveNorm = have.map((s) => String(s).trim().toLowerCase());
+  return haveNorm.some((h) => wanted.has(h));
 };
 
 export const triMatch = (tri: TriBool, value: boolean | undefined) => {
@@ -37,9 +48,12 @@ export const triMatch = (tri: TriBool, value: boolean | undefined) => {
   return !value;
 };
 
-export const spellMatchesSchool = (spell: any, schoolIdxes: string[]) => {
-  if (!schoolIdxes.length) return true;
-  const ix = spell?.school?.index as string | undefined;
+export const spellMatchesSchool = (
+  spell: any,
+  selectedSchoolIdxes: string[]
+) => {
+  if (!selectedSchoolIdxes.length) return true;
+  const ix = spell?.school_idx as string | undefined;
   if (!ix) return false;
-  return schoolIdxes.includes(ix);
+  return selectedSchoolIdxes.includes(ix);
 };
