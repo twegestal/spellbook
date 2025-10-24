@@ -16,7 +16,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
         return;
       }
-
       const session = data.session;
       if (session) {
         setToken(session.access_token);
@@ -57,6 +56,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(data.session.user);
   };
 
+  const register = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: `${window.location.origin}/spells` },
+    });
+    if (error) throw new Error(error.message);
+
+    if (data.session?.access_token && data.session.user) {
+      setToken(data.session.access_token);
+      setUser(data.session.user);
+    } else {
+      setToken(null);
+      setUser(null);
+    }
+  };
+
   const logout = async () => {
     await supabase.auth.signOut();
     setToken(null);
@@ -64,7 +80,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ token, user, login, logout, loading }}>
+    <AuthContext.Provider
+      value={{ token, user, login, register, logout, loading }}
+    >
       {children}
     </AuthContext.Provider>
   );

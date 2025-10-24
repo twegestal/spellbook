@@ -8,8 +8,8 @@ import {
   Stack,
   chakra,
   Link,
-  Separator,
   HStack,
+  Separator,
   Text,
 } from '@chakra-ui/react';
 import { toaster, PasswordInput } from './ui';
@@ -17,8 +17,8 @@ import { useAuth } from '../context/auth';
 import { Link as RouterLink } from 'react-router-dom';
 import { GoogleLoginButton } from './GoogleLoginButton';
 
-export const LoginPage = () => {
-  const { login } = useAuth();
+export const RegisterPage = () => {
+  const { register } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -27,16 +27,17 @@ export const LoginPage = () => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await login(email.trim(), password);
+      await register(email.trim(), password);
       toaster.create({
-        title: 'Logged in',
+        title: 'Account created',
+        description: 'If required, please confirm via the email we sent you.',
         type: 'success',
         closable: true,
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unexpected error';
       toaster.create({
-        title: 'Login failed',
+        title: 'Registration failed',
         description: message,
         type: 'error',
         closable: true,
@@ -52,7 +53,7 @@ export const LoginPage = () => {
         <Box p="6" borderWidth="1px" borderRadius="md">
           <Stack gap="6">
             <Heading size="md" textAlign="center">
-              Sign in
+              Create an account
             </Heading>
 
             <Stack gap="2">
@@ -76,8 +77,8 @@ export const LoginPage = () => {
               </chakra.label>
               <PasswordInput
                 id="password"
-                autoComplete="current-password"
-                placeholder="Your password"
+                autoComplete="new-password"
+                placeholder="Choose a strong password"
                 value={password}
                 onChange={(e) => setPassword(e.currentTarget.value)}
                 required
@@ -85,7 +86,7 @@ export const LoginPage = () => {
             </Stack>
 
             <Button type="submit" loading={submitting} colorPalette="purple">
-              Sign in
+              Create account
             </Button>
 
             <HStack>
@@ -99,9 +100,9 @@ export const LoginPage = () => {
             <GoogleLoginButton label="Continue with Google" />
 
             <Stack gap="1" align="center" fontSize="sm">
-              <span>Don’t have an account?</span>
+              <span>Already have an account?</span>
               <Link asChild variant="underline" colorPalette="purple">
-                <RouterLink to="/register">Create one</RouterLink>
+                <RouterLink to="/login">Sign in</RouterLink>
               </Link>
             </Stack>
           </Stack>
