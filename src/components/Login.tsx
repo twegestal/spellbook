@@ -14,11 +14,13 @@ import {
 } from '@chakra-ui/react';
 import { toaster, PasswordInput } from './ui';
 import { useAuth } from '../context/auth';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { GoogleLoginButton } from './GoogleLoginButton';
 
 export const LoginPage = () => {
   const { login } = useAuth();
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -28,11 +30,8 @@ export const LoginPage = () => {
     setSubmitting(true);
     try {
       await login(email.trim(), password);
-      toaster.create({
-        title: 'Logged in',
-        type: 'success',
-        closable: true,
-      });
+      toaster.create({ title: 'Logged in', type: 'success', closable: true });
+      navigate('/spells', { replace: true });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unexpected error';
       toaster.create({

@@ -44,16 +44,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) throw new Error(error.message);
-    if (!data.session?.access_token || !data.session.user) {
-      throw new Error('Login failed: No session returned');
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw new Error(error.message);
+      if (!data.session?.access_token || !data.session.user) {
+        throw new Error('Login failed: No session returned');
+      }
+      setToken(data.session.access_token);
+      setUser(data.session.user);
+    } finally {
+      setLoading(false);
     }
-    setToken(data.session.access_token);
-    setUser(data.session.user);
   };
 
   const register = async (email: string, password: string) => {
