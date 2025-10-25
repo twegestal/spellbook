@@ -37,20 +37,7 @@ export const GoogleLoginButton = ({
       loading={loading}
       width="100%"
       justifyContent="center"
-      variant="surface"
-      bg="white"
-      border="1px solid"
-      borderColor="gray.300"
-      _hover={{ bg: 'gray.50' }}
-      _active={{ bg: 'gray.100' }}
-      _dark={{
-        bg: 'gray.800',
-        borderColor: 'gray.700',
-        _hover: { bg: 'gray.700' },
-      }}
-      color="black"
-      fontWeight="medium"
-      shadow="sm"
+      variant="outline"
     >
       <HStack>
         <Image
