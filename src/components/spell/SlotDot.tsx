@@ -5,11 +5,13 @@ export function SlotDot({
   onClick,
   size = 18,
   disabled = false,
+  ariaLabel,
 }: {
   isSpent: boolean;
   onClick: () => void;
   size?: number;
   disabled?: boolean;
+  ariaLabel?: string;
 }) {
   const theme = useMantineTheme();
   const border = theme.colors.dark[3];
@@ -17,7 +19,7 @@ export function SlotDot({
 
   return (
     <UnstyledButton
-      aria-label="Open slot picker"
+      aria-label={ariaLabel ?? 'Open slot picker'}
       onClick={onClick}
       disabled={disabled}
       style={{

@@ -58,25 +58,19 @@ export function MagnifiedSlotPicker({
           {Array.from({ length: maximum }, (_, i) => {
             const index = i + 1;
             const isSpent = i < spent;
+
             return (
-              <button
-                disabled={disabled}
+              <SlotDot
                 key={i}
-                aria-label={`Toggle slot ${index}`}
+                isSpent={isSpent}
+                size={40}
+                disabled={disabled}
+                ariaLabel={`Toggle slot ${index}`}
                 onClick={() => {
                   onToggle(index);
                   onClose();
                 }}
-                style={{
-                  background: 'transparent',
-                  padding: 0,
-                  border: 'none',
-                  lineHeight: 0,
-                  cursor: 'pointer',
-                }}
-              >
-                <SlotDot isSpent={isSpent} onClick={() => {}} size={40} />
-              </button>
+              />
             );
           })}
         </Group>
