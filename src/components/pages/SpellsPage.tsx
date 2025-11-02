@@ -1,32 +1,106 @@
-import { useMemo } from 'react';
-import { Box, Center, Loader, Stack, Text } from '@mantine/core';
-import type { Spell } from '../../types/spells';
+import { useEffect, useState, useCallback, useMemo } from 'react';
+import {
+  ActionIcon,
+  Group,
+  Loader,
+  Stack,
+  TextInput,
+  Center,
+} from '@mantine/core';
+import { X, Filter, Search } from 'lucide-react';
+import { useHeader } from '../../components/layout/AppShell/AppShellLayout';
 import { useSpells } from '../../hooks/useSpell';
 import { useSpellSearch } from '../../hooks/useSpellSearch';
 import { SpellList } from '../spell/SpellList';
 import { openSpellModal } from '../overlays/openSpellModal';
+import {
+  emptyFilters,
+  getSavingThrow,
+  spellHasAnyClass,
+  spellMatchesSchool,
+  triMatch,
+  type SpellFilters,
+} from '../../types/filters';
+import { SpellFiltersDrawer } from '../filters/SpellFilterDrawer';
 
 export default function SpellsPage() {
+  const { setLeft, setRight } = useHeader();
+
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [filters, setFilters] = useState<SpellFilters>(emptyFilters);
+
   const { data, isLoading } = useSpells();
-  const { spells } = useSpellSearch(data, '');
+  const { spells: queryFiltered } = useSpellSearch(data, query);
 
-  const grouped = useMemo(() => {
-    const groups = (spells ?? []).reduce((acc, s) => {
-      const lvl = s.level ?? 0;
-      (acc[lvl] ??= []).push(s);
-      return acc;
-    }, {} as Record<number, Spell[]>);
+  const filterSpell = useCallback((s: any, f: SpellFilters) => {
+    if (f.levels.length && !f.levels.includes(s.level)) return false;
+    if (!spellHasAnyClass(s, f.classes)) return false;
+    if (!spellMatchesSchool(s, f.schools)) return false;
+    const st = getSavingThrow(s);
+    if (f.savingThrows.length && (!st || !f.savingThrows.includes(st)))
+      return false;
+    if (!triMatch(f.ritual, s.ritual)) return false;
+    if (!triMatch(f.concentration, s.concentration)) return false;
+    return true;
+  }, []);
 
-    const levels = Object.keys(groups)
-      .map(Number)
-      .sort((a, b) => a - b);
+  const applyFilters = useCallback(
+    (arr: any[], f: SpellFilters) => arr.filter((s) => filterSpell(s, f)),
+    [filterSpell]
+  );
 
-    for (const lvl of levels) {
-      groups[lvl].sort((a, b) => a.name.localeCompare(b.name));
-    }
+  const filteredSpells = useMemo(
+    () => applyFilters(queryFiltered ?? [], filters),
+    [applyFilters, queryFiltered, filters]
+  );
 
-    return { groups, levels };
-  }, [spells]);
+  const computeMatchingCount = useCallback(
+    (f: SpellFilters) => applyFilters(queryFiltered ?? [], f).length,
+    [applyFilters, queryFiltered]
+  );
+
+  useEffect(() => {
+    setLeft(
+      <Group gap="xs" wrap="nowrap" w="100%">
+        <TextInput
+          placeholder="Search spells..."
+          value={query}
+          onChange={(e) => setQuery(e.currentTarget.value)}
+          leftSection={<Search size={18} style={{ opacity: 0.6 }} />}
+          rightSection={
+            query ? (
+              <ActionIcon
+                size="sm"
+                variant="subtle"
+                onClick={() => setQuery('')}
+              >
+                <X size={16} />
+              </ActionIcon>
+            ) : null
+          }
+          radius="md"
+          size="sm"
+          styles={{
+            input: {
+              minWidth: 220,
+              fontSize: 14,
+            },
+          }}
+        />
+      </Group>
+    );
+
+    setRight(
+      <ActionIcon
+        aria-label="Open filters"
+        variant="subtle"
+        onClick={() => setDrawerOpen(true)}
+      >
+        <Filter size={18} />
+      </ActionIcon>
+    );
+  }, [query, setLeft, setRight]);
 
   if (isLoading) {
     return (
@@ -36,27 +110,22 @@ export default function SpellsPage() {
     );
   }
 
-  if (!grouped.levels.length) {
-    return (
-      <Center mih="50vh">
-        <Text c="dimmed">No spells to show yet.</Text>
-      </Center>
-    );
-  }
-
   return (
-    <Stack gap="lg">
-      {grouped.levels.map((lvl) => (
-        <Box key={lvl}>
-          <Text fw={600} c="dimmed" tt="uppercase" fz="xs" mb="xs">
-            {lvl === 0 ? 'Cantrips' : `Level ${lvl}`}
-          </Text>
-          <SpellList
-            spells={grouped.groups[lvl]}
-            onOpenDetails={(spell) => openSpellModal(spell)}
-          />
-        </Box>
-      ))}
-    </Stack>
+    <>
+      <Stack gap="lg">
+        <SpellList
+          spells={filteredSpells ?? []}
+          onOpenDetails={(spell) => openSpellModal(spell)}
+        />
+      </Stack>
+
+      <SpellFiltersDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        value={filters}
+        onChange={setFilters}
+        computeMatchingCount={computeMatchingCount}
+      />
+    </>
   );
 }

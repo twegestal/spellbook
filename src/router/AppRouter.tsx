@@ -10,8 +10,7 @@ import { LoginPage } from '../components/auth/LoginPage';
 import { RegisterPage } from '../components/auth/RegisterPage';
 import { AuthCallback } from '../components/auth/AuthCallback';
 import SettingsPage from '../components/pages/SettingsPage';
-
-const CharactersPage = () => <div>Characters (coming soon)</div>;
+import CharactersPage from '../components/pages/CharactersPage';
 
 const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },

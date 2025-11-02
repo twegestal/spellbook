@@ -40,7 +40,7 @@ export function BottomNav() {
               size={24}
               color={
                 active
-                  ? 'var(--mantine-color-grape-6)'
+                  ? 'var(--mantine-primary-color-filled)'
                   : 'var(--mantine-color-dimmed)'
               }
             />

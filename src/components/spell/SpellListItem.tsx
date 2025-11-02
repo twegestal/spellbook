@@ -24,16 +24,13 @@ export function SpellListItem({ spell, onOpenDetails }: Props) {
             variant="outline"
             aria-label={`Add ${spell.name}`}
             onClick={(e) => e.stopPropagation()}
-            color="grape"
           >
             <PlusCircle size={18} />
           </ActionIcon>
           <Text>{spell.name}</Text>
         </Group>
 
-        <Badge variant="light" color="grape">
-          {levelLabel}
-        </Badge>
+        <Badge variant="light">{levelLabel}</Badge>
       </Group>
     </Card>
   );

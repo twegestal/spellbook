@@ -77,7 +77,7 @@ export function LoginPage() {
             autoComplete="current-password"
           />
 
-          <Button type="submit" loading={submitting} color="grape">
+          <Button type="submit" loading={submitting}>
             Sign in
           </Button>
 
@@ -100,12 +100,7 @@ export function LoginPage() {
 
           <Text fz="sm" ta="center">
             Don’t have an account?{' '}
-            <Anchor
-              component={Link}
-              to="/register"
-              underline="always"
-              c="grape"
-            >
+            <Anchor component={Link} to="/register" underline="always">
               Create one
             </Anchor>
           </Text>

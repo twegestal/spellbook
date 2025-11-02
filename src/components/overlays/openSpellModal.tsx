@@ -15,9 +15,7 @@ function SpellDetails({
   return (
     <Stack gap="sm">
       <Group gap="xs">
-        <Badge variant="light" color="grape">
-          {levelLabel}
-        </Badge>
+        <Badge variant="light">{levelLabel}</Badge>
         {spell.school_name && (
           <Badge variant="light" color="teal">
             {spell.school_name}
@@ -136,7 +134,7 @@ function SpellDetails({
 
       <Divider my="sm" />
       <Group justify="flex-end">
-        <Button color="grape" variant="light" onClick={onClose}>
+        <Button variant="light" onClick={onClose}>
           Close
         </Button>
       </Group>

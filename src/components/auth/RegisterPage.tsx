@@ -80,7 +80,7 @@ export function RegisterPage() {
             autoComplete="new-password"
           />
 
-          <Button type="submit" loading={submitting} color="grape">
+          <Button type="submit" loading={submitting}>
             Create account
           </Button>
 
@@ -103,7 +103,7 @@ export function RegisterPage() {
 
           <Text fz="sm" ta="center">
             Already have an account?{' '}
-            <Anchor component={Link} to="/login" underline="always" c="grape">
+            <Anchor component={Link} to="/login" underline="always">
               Sign in
             </Anchor>
           </Text>
