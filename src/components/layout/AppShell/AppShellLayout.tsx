@@ -1,5 +1,5 @@
 import { useMemo, useState, createContext, useContext } from 'react';
-import { AppShell, Group, Title } from '@mantine/core';
+import { AppShell, Group, Title, Box } from '@mantine/core';
 import { Outlet } from 'react-router-dom';
 import { BottomNav } from './BottomNav';
 
@@ -16,6 +16,9 @@ export function useHeader() {
 }
 
 export function AppShellLayout() {
+  const HEADER_BASE = 56;
+  const FOOTER_BASE = 64;
+
   const [left, setLeft] = useState<React.ReactNode>(
     <Title order={4}>Spellbook</Title>
   );
@@ -25,9 +28,18 @@ export function AppShellLayout() {
 
   return (
     <HeaderCtx.Provider value={headerAPI}>
-      <AppShell header={{ height: 56 }} padding="md" footer={{ height: 64 }}>
-        <AppShell.Header px="md">
-          <Group h="100%" justify="space-between" wrap="nowrap">
+      <AppShell
+        header={{ height: `calc(${HEADER_BASE}px + env(safe-area-inset-top))` }}
+        footer={{
+          height: `calc(${FOOTER_BASE}px + env(safe-area-inset-bottom))`,
+        }}
+        padding="md"
+      >
+        <AppShell.Header
+          px="md"
+          style={{ paddingTop: 'env(safe-area-inset-top)' }}
+        >
+          <Group h={HEADER_BASE} justify="space-between" wrap="nowrap">
             <Group gap="sm" wrap="nowrap">
               {left}
             </Group>
@@ -37,12 +49,18 @@ export function AppShellLayout() {
           </Group>
         </AppShell.Header>
 
-        <AppShell.Main>
+        <AppShell.Main style={{ background: 'var(--mantine-color-body)' }}>
           <Outlet />
         </AppShell.Main>
 
-        <AppShell.Footer px="xs" py={0}>
-          <BottomNav />
+        <AppShell.Footer
+          style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+          px="xs"
+          py={0}
+        >
+          <Box w="100%" h={FOOTER_BASE} style={{ display: 'flex' }}>
+            <BottomNav />
+          </Box>
         </AppShell.Footer>
       </AppShell>
     </HeaderCtx.Provider>

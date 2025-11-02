@@ -12,25 +12,25 @@ export function ThemeBarSync() {
       .trim();
     if (!bodyColor) bodyColor = scheme === 'dark' ? '#242424' : '#ffffff';
 
-    let themeMeta = document.querySelector(
+    let meta = document.querySelector(
       'meta[name="theme-color"]'
     ) as HTMLMetaElement | null;
-    if (!themeMeta) {
-      themeMeta = document.createElement('meta');
-      themeMeta.setAttribute('name', 'theme-color');
-      document.head.appendChild(themeMeta);
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.setAttribute('name', 'theme-color');
+      document.head.appendChild(meta);
     }
-    themeMeta.setAttribute('content', bodyColor);
+    meta.setAttribute('content', bodyColor);
 
-    let iosMeta = document.querySelector(
+    let ios = document.querySelector(
       'meta[name="apple-mobile-web-app-status-bar-style"]'
     ) as HTMLMetaElement | null;
-    if (!iosMeta) {
-      iosMeta = document.createElement('meta');
-      iosMeta.setAttribute('name', 'apple-mobile-web-app-status-bar-style');
-      document.head.appendChild(iosMeta);
+    if (!ios) {
+      ios = document.createElement('meta');
+      ios.setAttribute('name', 'apple-mobile-web-app-status-bar-style');
+      document.head.appendChild(ios);
     }
-    iosMeta.setAttribute('content', 'black-translucent');
+    ios.setAttribute('content', 'black-translucent');
   }, [scheme]);
 
   return null;

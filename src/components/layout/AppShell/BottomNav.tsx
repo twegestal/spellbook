@@ -1,4 +1,4 @@
-import { Group, UnstyledButton } from '@mantine/core';
+import { Box, UnstyledButton } from '@mantine/core';
 import { Search, User, Settings } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -19,7 +19,14 @@ export function BottomNav() {
   const navigate = useNavigate();
 
   return (
-    <Group justify="space-around" px="md" py="xs">
+    <Box
+      w="100%"
+      style={{
+        display: 'flex',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+      }}
+    >
       {ITEMS.map(({ to, label, icon: Icon }) => {
         const active = pathname === to || pathname.startsWith(`${to}/`);
 
@@ -47,6 +54,6 @@ export function BottomNav() {
           </UnstyledButton>
         );
       })}
-    </Group>
+    </Box>
   );
 }
