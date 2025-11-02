@@ -8,6 +8,7 @@ import { MagnifiedSlotPicker } from './MagnifiedSlotPicker';
 import { SlotDot } from './SlotDot';
 import { notifications } from '@mantine/notifications';
 import { openCastSpellModal } from '../overlays/openCastSpellModal';
+import { fireballBlast } from '../fireball/fireballBlast';
 
 type Props = {
   characterId: string;
@@ -70,6 +71,9 @@ export function PreparedSpellList({
               });
             },
             onSuccess: () => {
+              if (spell.idx === 'fireball') {
+                fireballBlast();
+              }
               notifications.show({
                 color: 'teal',
                 title: 'Spell cast',
