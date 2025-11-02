@@ -49,7 +49,14 @@ export function PreparedSpellList({
       spell,
       slots,
       onPick: (slotLevel, slotIndex) => {
-        if (slotLevel === 0) return;
+        if (slotLevel === 0) {
+          notifications.show({
+            color: 'green',
+            title: 'Spell cast',
+            message: `Cast ${spell.name}`,
+          });
+          return;
+        }
 
         if (isBusy) return;
         toggle.mutate(

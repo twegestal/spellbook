@@ -20,7 +20,7 @@ export default function App() {
         }}
       />
       <ThemeBarSync />
-      <Notifications position="top-right" />
+      <Notifications position="bottom-center" />
       <AppRouter />
     </MantineProvider>
   );
