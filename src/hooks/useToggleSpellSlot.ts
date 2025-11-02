@@ -1,7 +1,21 @@
 import { useQueryClient } from '@tanstack/react-query';
+import { notifications } from '@mantine/notifications';
 import { useAuthedMutation } from './useAuthedMutation';
 import { useApi } from './useApi';
-import type { SpellSlots } from './useSpellSlots';
+
+type RawPreparedLevel = {
+  slotLevel: number;
+  remaining: number;
+  maximum: number;
+};
+type RawSlotsPrepared = { type: 'prepared'; levels: RawPreparedLevel[] };
+type RawSlotsPact = {
+  type: 'pact';
+  slotLevel: number;
+  remaining: number;
+  maximum: number;
+};
+type RawSlots = RawSlotsPrepared | RawSlotsPact;
 
 type Vars = {
   characterId: string;
@@ -10,8 +24,7 @@ type Vars = {
   spellId?: string;
   note?: string;
 };
-
-type Ctx = { prev?: SpellSlots };
+type Ctx = { prev?: RawSlots };
 
 export function useToggleSpellSlot() {
   const toggleSpellSlot = useApi('toggleSpellSlot');
@@ -28,59 +41,61 @@ export function useToggleSpellSlot() {
     Vars,
     Ctx
   >({
+    mutationKey: ['toggle-slot'],
     mutationFn: (v) => toggleSpellSlot(v),
 
     onMutate: async (vars) => {
-      const key = ['slots', vars.characterId];
+      const key = ['slots', vars.characterId] as const;
       await qc.cancelQueries({ queryKey: key });
 
-      const prev = qc.getQueryData<SpellSlots>(key);
+      const prev = qc.getQueryData<RawSlots>(key);
       if (!prev) return { prev };
 
-      let next: SpellSlots = prev;
+      let next: RawSlots = prev;
 
-      if (prev.kind === 'prepared') {
-        const byLevel = { ...prev.byLevel };
-        const row = byLevel[vars.slotLevel];
-        if (row) {
+      if (prev.type === 'prepared') {
+        const levels = prev.levels.map((l) => ({ ...l }));
+        const idx = levels.findIndex((l) => l.slotLevel === vars.slotLevel);
+        if (idx !== -1) {
+          const row = levels[idx];
           const spentCount = row.maximum - row.remaining;
           const isBubbleSpent = vars.slotIndex <= spentCount;
           const remaining = Math.max(
             0,
             Math.min(row.maximum, row.remaining + (isBubbleSpent ? 1 : -1))
           );
-          byLevel[vars.slotLevel] = { ...row, remaining };
-          next = { kind: 'prepared', byLevel };
+          levels[idx] = { ...row, remaining };
+          next = { type: 'prepared', levels };
         }
-      } else {
-        if (vars.slotLevel === prev.slotLevel) {
-          const spentCount = prev.maximum - prev.remaining;
-          const isBubbleSpent = vars.slotIndex <= spentCount;
-          const remaining = Math.max(
-            0,
-            Math.min(prev.maximum, prev.remaining + (isBubbleSpent ? 1 : -1))
-          );
-          next = {
-            kind: 'pact',
-            slotLevel: prev.slotLevel,
-            maximum: prev.maximum,
-            remaining,
-          };
-        }
+      } else if (prev.type === 'pact' && prev.slotLevel === vars.slotLevel) {
+        const spentCount = prev.maximum - prev.remaining;
+        const isBubbleSpent = vars.slotIndex <= spentCount;
+        const remaining = Math.max(
+          0,
+          Math.min(prev.maximum, prev.remaining + (isBubbleSpent ? 1 : -1))
+        );
+        next = { ...prev, remaining };
       }
 
       qc.setQueryData(key, next);
       return { prev };
     },
 
-    onError: (_err, vars, ctx) => {
+    onError: (err, vars, ctx) => {
       if (ctx?.prev) {
-        qc.setQueryData(['slots', vars.characterId], ctx.prev);
+        qc.setQueryData(['slots', vars.characterId] as const, ctx.prev);
       }
+      const message =
+        err instanceof Error ? err.message : 'Failed to update spell slot';
+      notifications.show({
+        color: 'red',
+        title: 'Could not update slot',
+        message,
+      });
     },
 
     onSettled: (_data, _err, vars) => {
-      qc.invalidateQueries({ queryKey: ['slots', vars.characterId] });
+      qc.invalidateQueries({ queryKey: ['slots', vars.characterId] as const });
     },
   });
 }
