@@ -136,6 +136,8 @@ export function SpellFiltersDrawer({
       </Badge>
     );
 
+  const safeBottom = 'env(safe-area-inset-bottom)';
+
   return (
     <Drawer
       opened={open}
@@ -143,6 +145,8 @@ export function SpellFiltersDrawer({
       position="right"
       size={480}
       withCloseButton
+      overlayProps={{ opacity: 0.35, blur: 2 }}
+      zIndex={400}
       title={
         <Group gap="xs">
           <Text fw={600}>Filter spells</Text>
@@ -150,200 +154,218 @@ export function SpellFiltersDrawer({
         </Group>
       }
       styles={{
-        content: { overflowX: 'hidden' },
+        content: { overflow: 'hidden' },
+        body: {
+          padding: 0,
+        },
       }}
     >
       <Drawer.Body
         p={0}
-        style={{ display: 'flex', flexDirection: 'column', maxHeight: '100%' }}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          minHeight: 0,
+        }}
       >
-        <ScrollArea style={{ flex: 1, padding: 16 }} scrollbars="y">
-          <Stack gap="md">
-            <Accordion value={opened} onChange={setOpened}>
-              <Accordion.Item value="levels">
-                <Accordion.Control>
-                  <Group justify="space-between" w="100%">
-                    <Text>Level</Text>
-                    <ClearBadge
-                      visible={draft.levels.length > 0}
-                      onClear={() => setDraft((d) => ({ ...d, levels: [] }))}
-                    />
-                  </Group>
-                </Accordion.Control>
-                <Accordion.Panel>
-                  <SimpleGrid cols={{ base: 2, sm: 2 }} spacing="xs">
-                    {LEVELS.map((lvl) => {
-                      const checked = draft.levels.includes(lvl);
-                      return (
-                        <Checkbox
-                          key={lvl}
-                          w="100%"
-                          label={levelLabel(lvl)}
-                          checked={checked}
-                          onChange={(e) =>
-                            setLevels(lvl, e.currentTarget.checked)
-                          }
-                        />
-                      );
-                    })}
-                  </SimpleGrid>
-                </Accordion.Panel>
-              </Accordion.Item>
+        <ScrollArea
+          style={{ flex: 1, minHeight: 0 }}
+          type="auto"
+          scrollbars="y"
+        >
+          <Box p="md">
+            <Stack gap="md">
+              <Accordion value={opened} onChange={setOpened}>
+                <Accordion.Item value="levels">
+                  <Accordion.Control>
+                    <Group justify="space-between" w="100%">
+                      <Text>Level</Text>
+                      <ClearBadge
+                        visible={draft.levels.length > 0}
+                        onClear={() => setDraft((d) => ({ ...d, levels: [] }))}
+                      />
+                    </Group>
+                  </Accordion.Control>
+                  <Accordion.Panel>
+                    <SimpleGrid cols={{ base: 2, sm: 2 }} spacing="xs">
+                      {LEVELS.map((lvl) => {
+                        const checked = draft.levels.includes(lvl);
+                        return (
+                          <Checkbox
+                            key={lvl}
+                            w="100%"
+                            label={levelLabel(lvl)}
+                            checked={checked}
+                            onChange={(e) =>
+                              setLevels(lvl, e.currentTarget.checked)
+                            }
+                          />
+                        );
+                      })}
+                    </SimpleGrid>
+                  </Accordion.Panel>
+                </Accordion.Item>
 
-              <Accordion.Item value="classes">
-                <Accordion.Control>
-                  <Group justify="space-between" w="100%">
-                    <Text>Class</Text>
-                    <ClearBadge
-                      visible={draft.classes.length > 0}
-                      onClear={() => setDraft((d) => ({ ...d, classes: [] }))}
-                    />
-                  </Group>
-                </Accordion.Control>
-                <Accordion.Panel>
-                  <SimpleGrid cols={{ base: 2, sm: 2 }} spacing="xs">
-                    {CLASSES.map((c) => {
-                      const checked = draft.classes.includes(c.index);
-                      return (
-                        <Checkbox
-                          key={c.index}
-                          w="100%"
-                          label={c.name}
-                          checked={checked}
-                          onChange={(e) =>
-                            setClass(c.index, e.currentTarget.checked)
-                          }
-                        />
-                      );
-                    })}
-                  </SimpleGrid>
-                </Accordion.Panel>
-              </Accordion.Item>
+                <Accordion.Item value="classes">
+                  <Accordion.Control>
+                    <Group justify="space-between" w="100%">
+                      <Text>Class</Text>
+                      <ClearBadge
+                        visible={draft.classes.length > 0}
+                        onClear={() => setDraft((d) => ({ ...d, classes: [] }))}
+                      />
+                    </Group>
+                  </Accordion.Control>
+                  <Accordion.Panel>
+                    <SimpleGrid cols={{ base: 2, sm: 2 }} spacing="xs">
+                      {CLASSES.map((c) => {
+                        const checked = draft.classes.includes(c.index);
+                        return (
+                          <Checkbox
+                            key={c.index}
+                            w="100%"
+                            label={c.name}
+                            checked={checked}
+                            onChange={(e) =>
+                              setClass(c.index, e.currentTarget.checked)
+                            }
+                          />
+                        );
+                      })}
+                    </SimpleGrid>
+                  </Accordion.Panel>
+                </Accordion.Item>
 
-              <Accordion.Item value="schools">
-                <Accordion.Control>
-                  <Group justify="space-between" w="100%">
-                    <Text>School</Text>
-                    <ClearBadge
-                      visible={draft.schools.length > 0}
-                      onClear={() => setDraft((d) => ({ ...d, schools: [] }))}
-                    />
-                  </Group>
-                </Accordion.Control>
-                <Accordion.Panel>
-                  <SimpleGrid cols={{ base: 2, sm: 2 }} spacing="xs">
-                    {SCHOOLS.map((s) => {
-                      const checked = draft.schools.includes(s.index);
-                      return (
-                        <Checkbox
-                          key={s.index}
-                          w="100%"
-                          label={s.name}
-                          checked={checked}
-                          onChange={(e) =>
-                            setSchool(s.index, e.currentTarget.checked)
-                          }
-                        />
-                      );
-                    })}
-                  </SimpleGrid>
-                </Accordion.Panel>
-              </Accordion.Item>
+                <Accordion.Item value="schools">
+                  <Accordion.Control>
+                    <Group justify="space-between" w="100%">
+                      <Text>School</Text>
+                      <ClearBadge
+                        visible={draft.schools.length > 0}
+                        onClear={() => setDraft((d) => ({ ...d, schools: [] }))}
+                      />
+                    </Group>
+                  </Accordion.Control>
+                  <Accordion.Panel>
+                    <SimpleGrid cols={{ base: 2, sm: 2 }} spacing="xs">
+                      {SCHOOLS.map((s) => {
+                        const checked = draft.schools.includes(s.index);
+                        return (
+                          <Checkbox
+                            key={s.index}
+                            w="100%"
+                            label={s.name}
+                            checked={checked}
+                            onChange={(e) =>
+                              setSchool(s.index, e.currentTarget.checked)
+                            }
+                          />
+                        );
+                      })}
+                    </SimpleGrid>
+                  </Accordion.Panel>
+                </Accordion.Item>
 
-              <Accordion.Item value="saving">
-                <Accordion.Control>
-                  <Group justify="space-between" w="100%">
-                    <Text>Saving throw</Text>
-                    <ClearBadge
-                      visible={draft.savingThrows.length > 0}
-                      onClear={() =>
-                        setDraft((d) => ({ ...d, savingThrows: [] }))
+                <Accordion.Item value="saving">
+                  <Accordion.Control>
+                    <Group justify="space-between" w="100%">
+                      <Text>Saving throw</Text>
+                      <ClearBadge
+                        visible={draft.savingThrows.length > 0}
+                        onClear={() =>
+                          setDraft((d) => ({ ...d, savingThrows: [] }))
+                        }
+                      />
+                    </Group>
+                  </Accordion.Control>
+                  <Accordion.Panel>
+                    <SimpleGrid cols={{ base: 3, sm: 3 }} spacing="xs">
+                      {ABILITIES.map((a) => {
+                        const checked = draft.savingThrows.includes(a as any);
+                        return (
+                          <Checkbox
+                            key={a}
+                            w="100%"
+                            label={a}
+                            checked={checked}
+                            onChange={(e) =>
+                              setSaving(a as any, e.currentTarget.checked)
+                            }
+                          />
+                        );
+                      })}
+                    </SimpleGrid>
+                  </Accordion.Panel>
+                </Accordion.Item>
+
+                <Accordion.Item value="ritual">
+                  <Accordion.Control>
+                    <Group justify="space-between" w="100%">
+                      <Text>Ritual</Text>
+                      <ClearBadge
+                        visible={draft.ritual !== 'any'}
+                        onClear={() => setRitual('any')}
+                      />
+                    </Group>
+                  </Accordion.Control>
+                  <Accordion.Panel>
+                    <Chip.Group
+                      multiple={false}
+                      value={draft.ritual}
+                      onChange={(val) => setRitual((val as TriBool) ?? 'any')}
+                    >
+                      <Group gap="xs">
+                        <Chip value="any">Any</Chip>
+                        <Chip value="yes">Yes</Chip>
+                        <Chip value="no">No</Chip>
+                      </Group>
+                    </Chip.Group>
+                  </Accordion.Panel>
+                </Accordion.Item>
+
+                <Accordion.Item value="concentration">
+                  <Accordion.Control>
+                    <Group justify="space-between" w="100%">
+                      <Text>Concentration</Text>
+                      <ClearBadge
+                        visible={draft.concentration !== 'any'}
+                        onClear={() => setConcentration('any')}
+                      />
+                    </Group>
+                  </Accordion.Control>
+                  <Accordion.Panel>
+                    <Chip.Group
+                      multiple={false}
+                      value={draft.concentration}
+                      onChange={(val) =>
+                        setConcentration((val as TriBool) ?? 'any')
                       }
-                    />
-                  </Group>
-                </Accordion.Control>
-                <Accordion.Panel>
-                  <SimpleGrid cols={{ base: 3, sm: 3 }} spacing="xs">
-                    {ABILITIES.map((a) => {
-                      const checked = draft.savingThrows.includes(a as any);
-                      return (
-                        <Checkbox
-                          key={a}
-                          w="100%"
-                          label={a}
-                          checked={checked}
-                          onChange={(e) =>
-                            setSaving(a as any, e.currentTarget.checked)
-                          }
-                        />
-                      );
-                    })}
-                  </SimpleGrid>
-                </Accordion.Panel>
-              </Accordion.Item>
+                    >
+                      <Group gap="xs">
+                        <Chip value="any">Any</Chip>
+                        <Chip value="yes">Yes</Chip>
+                        <Chip value="no">No</Chip>
+                      </Group>
+                    </Chip.Group>
+                  </Accordion.Panel>
+                </Accordion.Item>
+              </Accordion>
 
-              <Accordion.Item value="ritual">
-                <Accordion.Control>
-                  <Group justify="space-between" w="100%">
-                    <Text>Ritual</Text>
-                    <ClearBadge
-                      visible={draft.ritual !== 'any'}
-                      onClear={() => setRitual('any')}
-                    />
-                  </Group>
-                </Accordion.Control>
-                <Accordion.Panel>
-                  <Chip.Group
-                    multiple={false}
-                    value={draft.ritual}
-                    onChange={(val) => setRitual((val as TriBool) ?? 'any')}
-                  >
-                    <Group gap="xs">
-                      <Chip value="any">Any</Chip>
-                      <Chip value="yes">Yes</Chip>
-                      <Chip value="no">No</Chip>
-                    </Group>
-                  </Chip.Group>
-                </Accordion.Panel>
-              </Accordion.Item>
-
-              <Accordion.Item value="concentration">
-                <Accordion.Control>
-                  <Group justify="space-between" w="100%">
-                    <Text>Concentration</Text>
-                    <ClearBadge
-                      visible={draft.concentration !== 'any'}
-                      onClear={() => setConcentration('any')}
-                    />
-                  </Group>
-                </Accordion.Control>
-                <Accordion.Panel>
-                  <Chip.Group
-                    multiple={false}
-                    value={draft.concentration}
-                    onChange={(val) =>
-                      setConcentration((val as TriBool) ?? 'any')
-                    }
-                  >
-                    <Group gap="xs">
-                      <Chip value="any">Any</Chip>
-                      <Chip value="yes">Yes</Chip>
-                      <Chip value="no">No</Chip>
-                    </Group>
-                  </Chip.Group>
-                </Accordion.Panel>
-              </Accordion.Item>
-            </Accordion>
-
-            <Button variant="subtle" onClick={clearAll}>
-              Clear all
-            </Button>
-          </Stack>
+              <Button variant="subtle" onClick={clearAll}>
+                Clear all
+              </Button>
+            </Stack>
+          </Box>
         </ScrollArea>
 
         <Box
           p="md"
-          style={{ borderTop: '1px solid var(--mantine-color-default-border)' }}
+          style={{
+            borderTop: '1px solid var(--mantine-color-default-border)',
+            paddingBottom: safeBottom,
+            background: 'var(--mantine-color-body)',
+          }}
         >
           <Button
             fullWidth
