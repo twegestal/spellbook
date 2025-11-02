@@ -141,7 +141,7 @@ export function SpellFiltersDrawer({
       opened={open}
       onClose={() => onOpenChange(false)}
       position="right"
-      size={480} // wider drawer to avoid horizontal scroll
+      size={480}
       withCloseButton
       title={
         <Group gap="xs">
@@ -150,7 +150,7 @@ export function SpellFiltersDrawer({
         </Group>
       }
       styles={{
-        content: { overflowX: 'hidden' }, // guardrail: no horizontal scroll
+        content: { overflowX: 'hidden' },
       }}
     >
       <Drawer.Body
