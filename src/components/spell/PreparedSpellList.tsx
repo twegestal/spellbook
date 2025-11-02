@@ -52,6 +52,10 @@ export function PreparedSpellList({
       slots,
       onPick: (slotLevel, slotIndex) => {
         if (slotLevel === 0) {
+          const damage = spell.damage_type_name?.toLowerCase?.();
+          if (damage) {
+            spawnDamageBlast(damage as DamageType);
+          }
           notifications.show({
             color: 'green',
             title: 'Spell cast',

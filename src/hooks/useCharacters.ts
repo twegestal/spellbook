@@ -151,3 +151,64 @@ export const useRemovePreparedSpell = () => {
     },
   });
 };
+
+export const useUpdateCharacterLevel = () => {
+  const updateLevel = useApi('updateCharacterLevel');
+  const qc = useQueryClient();
+
+  return useAuthedMutation<
+    Character,
+    unknown,
+    { characterId: string; level: number },
+    {
+      prevList?: unknown;
+      prevOne?: unknown;
+    }
+  >({
+    mutationFn: ({ characterId, level }) => updateLevel(characterId, level),
+
+    onMutate: async ({ characterId, level }) => {
+      const listKey = ['characters'] as const;
+      const oneKey = ['characters', characterId] as const;
+
+      await qc.cancelQueries({ queryKey: listKey });
+      await qc.cancelQueries({ queryKey: oneKey });
+
+      const prevList = qc.getQueryData(listKey);
+      const prevOne = qc.getQueryData(oneKey);
+
+      qc.setQueryData(listKey, (old: unknown) => {
+        if (Array.isArray(old)) {
+          return (old as Character[]).map((c) =>
+            c.id === characterId ? { ...c, level } : c
+          );
+        }
+        return old;
+      });
+
+      qc.setQueryData(oneKey, (old: unknown) => {
+        if (old && typeof old === 'object' && 'id' in (old as any)) {
+          const c = old as Character;
+          if (c.id === characterId) return { ...c, level };
+        }
+        return old;
+      });
+
+      return { prevList, prevOne };
+    },
+
+    onError: (_err, { characterId }, ctx) => {
+      if (ctx?.prevList !== undefined) {
+        qc.setQueryData(['characters'], ctx.prevList);
+      }
+      if (ctx?.prevOne !== undefined) {
+        qc.setQueryData(['characters', characterId], ctx.prevOne);
+      }
+    },
+
+    onSettled: (_data, _err, vars) => {
+      qc.invalidateQueries({ queryKey: ['characters'] });
+      qc.invalidateQueries({ queryKey: ['characters', vars.characterId] });
+    },
+  });
+};

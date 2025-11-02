@@ -41,4 +41,9 @@ export const characterApi = (api: typeof ky) => ({
     api
       .delete(`characters/${characterId}/prepared-spells/${spellId}`)
       .json<{ ok: true }>(),
+
+  updateCharacterLevel: (characterId: string, level: number) =>
+    api
+      .patch(`characters/${characterId}/level`, { json: { level } })
+      .json<Character>(),
 });

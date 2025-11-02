@@ -8,6 +8,8 @@ import {
   Tabs,
   Text,
   Divider,
+  Group,
+  Badge,
 } from '@mantine/core';
 import { AlertCircle } from 'lucide-react';
 import { useHeader } from '../../components/layout/AppShell/AppShellLayout';
@@ -39,7 +41,16 @@ export default function CharacterDetailsPage() {
 
   useEffect(() => {
     setLeft(<Text fw={600}>Spellbook</Text>);
-    setRight(null);
+    setRight(
+      <Group justify="flex-start">
+        <Badge variant="light" color="blue">
+          Long rest
+        </Badge>
+        <Badge variant="light" color="blue">
+          Short rest
+        </Badge>
+      </Group>
+    );
   }, [setLeft, setRight]);
 
   const sortedKnownSpells = useMemo(() => {
