@@ -1,6 +1,6 @@
 import { Card, Group, Text, Badge, Button } from '@mantine/core';
-import type { Spell } from '../../types/spells';
 import { notifications } from '@mantine/notifications';
+import type { Spell } from '../../types/spells';
 import {
   useAddPreparedSpell,
   useRemovePreparedSpell,
@@ -19,35 +19,31 @@ export function KnownSpellListItem({
   isPrepared,
   onOpenDetails,
 }: Props) {
-  const { mutateAsync: addAsync, isPending: adding } = useAddPreparedSpell();
-  const { mutateAsync: removeAsync, isPending: removing } =
-    useRemovePreparedSpell();
-
-  const busy = adding || removing;
-  const spellId = String(spell.id);
+  const add = useAddPreparedSpell();
+  const remove = useRemovePreparedSpell();
+  const busy = add.isPending || remove.isPending;
 
   const handleToggle = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (busy) return;
+
     try {
       if (isPrepared) {
-        await removeAsync({ characterId, spellId });
-        notifications.show({
-          title: 'Spell unprepared',
-          message: `"${spell.name}" removed from prepared spells.`,
-        });
+        await remove.mutateAsync({ characterId, spellId: String(spell.id) });
       } else {
-        await addAsync({ characterId, spellId });
-        notifications.show({
-          title: 'Spell prepared',
-          message: `"${spell.name}" is now prepared.`,
+        await add.mutateAsync({
+          characterId,
+          spellId: String(spell.id),
+          spell,
         });
       }
-    } catch (err: any) {
+    } catch {
       notifications.show({
         color: 'red',
-        title: 'Action failed',
-        message: err?.message ?? 'Please try again.',
+        title: isPrepared
+          ? 'Could not unprepare spell'
+          : 'Could not prepare spell',
+        message: 'Please try again.',
       });
     }
   };

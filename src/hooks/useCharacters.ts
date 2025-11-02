@@ -71,19 +71,50 @@ export const useCharacterKnownSpells = (characterId: string) => {
   });
 };
 
+export const useCharacterPreparedSpells = (characterId: string) => {
+  const getPreparedSpells = useApi('getPreparedSpells');
+  return useAuthedQuery<Spell[], unknown, Spell[]>({
+    queryKey: ['characters', characterId, 'prepared-spells'],
+    enabled: !!characterId,
+    queryFn: async () => {
+      const res = await getPreparedSpells(characterId);
+      return res.results;
+    },
+    placeholderData: (prev) => prev,
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+  });
+};
+
 export const useAddPreparedSpell = () => {
   const addPreparedSpell = useApi('addPreparedSpell');
   const qc = useQueryClient();
+
   return useAuthedMutation<
     { character_id: string; spell_id: string; prepared_at: string },
     unknown,
-    { characterId: string; spellId: string }
+    { characterId: string; spellId: string; spell: Spell },
+    { prev: Spell[] }
   >({
-    mutationFn: addPreparedSpell,
-    onSuccess: (_data, vars) => {
-      qc.invalidateQueries({
-        queryKey: ['characters', vars.characterId, 'prepared-spells'],
-      });
+    mutationFn: ({ characterId, spellId }) =>
+      addPreparedSpell({ characterId, spellId }),
+
+    onMutate: async ({ characterId, spellId, spell }) => {
+      const key = ['characters', characterId, 'prepared-spells'] as const;
+      await qc.cancelQueries({ queryKey: key });
+
+      const prev = qc.getQueryData<Spell[]>(key) ?? [];
+      const exists = prev.some((s) => String(s.id) === String(spellId));
+      if (!exists) qc.setQueryData<Spell[]>(key, [...prev, spell]);
+
+      return { prev };
+    },
+
+    onError: (_err, { characterId }, ctx) => {
+      const key = ['characters', characterId, 'prepared-spells'] as const;
+      qc.setQueryData<Spell[]>(key, ctx?.prev ?? []);
     },
   });
 };
@@ -91,27 +122,32 @@ export const useAddPreparedSpell = () => {
 export const useRemovePreparedSpell = () => {
   const removePreparedSpell = useApi('removePreparedSpell');
   const qc = useQueryClient();
+
   return useAuthedMutation<
     { ok: true },
     unknown,
-    { characterId: string; spellId: string }
+    { characterId: string; spellId: string },
+    { prev: Spell[] }
   >({
     mutationFn: ({ characterId, spellId }) =>
       removePreparedSpell(characterId, spellId),
-    onSuccess: (_data, vars) => {
-      qc.invalidateQueries({
-        queryKey: ['characters', vars.characterId, 'prepared-spells'],
-      });
-    },
-  });
-};
 
-export const useCharacterPreparedSpells = (characterId: string) => {
-  const getPreparedSpells = useApi('getPreparedSpells');
-  return useAuthedQuery<SpellListResponse, unknown, Spell[]>({
-    queryKey: ['characters', characterId, 'prepared-spells'],
-    queryFn: () => getPreparedSpells(characterId),
-    enabled: !!characterId,
-    select: (d) => d.results,
+    onMutate: async ({ characterId, spellId }) => {
+      const key = ['characters', characterId, 'prepared-spells'] as const;
+      await qc.cancelQueries({ queryKey: key });
+
+      const prev = qc.getQueryData<Spell[]>(key) ?? [];
+      qc.setQueryData<Spell[]>(
+        key,
+        prev.filter((s) => String(s.id) !== String(spellId))
+      );
+
+      return { prev };
+    },
+
+    onError: (_err, { characterId }, ctx) => {
+      const key = ['characters', characterId, 'prepared-spells'] as const;
+      qc.setQueryData<Spell[]>(key, ctx?.prev ?? []);
+    },
   });
 };
