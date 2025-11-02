@@ -11,6 +11,8 @@ import { RegisterPage } from '../components/auth/RegisterPage';
 import { AuthCallback } from '../components/auth/AuthCallback';
 import SettingsPage from '../components/pages/SettingsPage';
 import CharactersPage from '../components/pages/CharactersPage';
+import CreateCharacterPage from '../components/pages/CreateCharacterPage';
+import CharacterDetailsPage from '../components/pages/CharacterDetailsPage';
 
 const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -26,6 +28,8 @@ const router = createBrowserRouter([
           { index: true, element: <Navigate to="/spells" replace /> },
           { path: '/spells', element: <SpellsPage /> },
           { path: '/characters', element: <CharactersPage /> },
+          { path: '/characters/new', element: <CreateCharacterPage /> },
+          { path: '/characters/:id', element: <CharacterDetailsPage /> },
           { path: '/settings', element: <SettingsPage /> },
         ],
       },
