@@ -1,6 +1,7 @@
 import { Card, Group, Badge, Text, ActionIcon } from '@mantine/core';
 import { PlusCircle } from 'lucide-react';
 import type { Spell } from '../../types/spells';
+import { openAssignSpellModal } from '../overlays/openAssignSpellModal';
 
 type Props = {
   spell: Spell;
@@ -23,10 +24,18 @@ export function SpellListItem({ spell, onOpenDetails }: Props) {
           <ActionIcon
             variant="outline"
             aria-label={`Add ${spell.name}`}
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              openAssignSpellModal(spell);
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') e.stopPropagation();
+            }}
           >
             <PlusCircle size={18} />
           </ActionIcon>
+
           <Text>{spell.name}</Text>
         </Group>
 

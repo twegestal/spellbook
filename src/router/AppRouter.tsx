@@ -2,7 +2,9 @@ import {
   createBrowserRouter,
   RouterProvider,
   Navigate,
+  Outlet,
 } from 'react-router-dom';
+import { ModalsProvider } from '@mantine/modals';
 import { AppShellLayout } from '../components/layout/AppShell/AppShellLayout';
 import SpellsPage from '../components/pages/SpellsPage';
 import { RequireAuth } from './RequireAuth';
@@ -14,29 +16,42 @@ import CharactersPage from '../components/pages/CharactersPage';
 import CreateCharacterPage from '../components/pages/CreateCharacterPage';
 import CharacterDetailsPage from '../components/pages/CharacterDetailsPage';
 
-const router = createBrowserRouter([
-  { path: '/login', element: <LoginPage /> },
-  { path: '/register', element: <RegisterPage /> },
-  { path: '/auth/callback', element: <AuthCallback /> },
+function RouterLevelProviders() {
+  return (
+    <ModalsProvider>
+      <Outlet />
+    </ModalsProvider>
+  );
+}
 
+const router = createBrowserRouter([
   {
-    element: <RequireAuth />,
+    element: <RouterLevelProviders />,
     children: [
+      { path: '/login', element: <LoginPage /> },
+      { path: '/register', element: <RegisterPage /> },
+      { path: '/auth/callback', element: <AuthCallback /> },
+
       {
-        element: <AppShellLayout />,
+        element: <RequireAuth />,
         children: [
-          { index: true, element: <Navigate to="/spells" replace /> },
-          { path: '/spells', element: <SpellsPage /> },
-          { path: '/characters', element: <CharactersPage /> },
-          { path: '/characters/new', element: <CreateCharacterPage /> },
-          { path: '/characters/:id', element: <CharacterDetailsPage /> },
-          { path: '/settings', element: <SettingsPage /> },
+          {
+            element: <AppShellLayout />,
+            children: [
+              { index: true, element: <Navigate to="/spells" replace /> },
+              { path: '/spells', element: <SpellsPage /> },
+              { path: '/characters', element: <CharactersPage /> },
+              { path: '/characters/new', element: <CreateCharacterPage /> },
+              { path: '/characters/:id', element: <CharacterDetailsPage /> },
+              { path: '/settings', element: <SettingsPage /> },
+            ],
+          },
         ],
       },
+
+      { path: '*', element: <Navigate to="/spells" replace /> },
     ],
   },
-
-  { path: '*', element: <Navigate to="/spells" replace /> },
 ]);
 
 export function AppRouter() {
