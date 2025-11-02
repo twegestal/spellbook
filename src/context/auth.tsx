@@ -5,6 +5,7 @@ export type AuthContextType = {
   token: string | null;
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;

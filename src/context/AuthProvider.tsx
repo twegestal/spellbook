@@ -61,6 +61,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const loginWithGoogle = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
+      });
+      if (error) throw new Error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const register = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -86,7 +99,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ token, user, login, register, logout, loading }}
+      value={{ token, user, login, loginWithGoogle, register, logout, loading }}
     >
       {children}
     </AuthContext.Provider>
