@@ -6,19 +6,19 @@ import { useSpellSlots } from '../../hooks/useSpellSlots';
 import { useToggleSpellSlot } from '../../hooks/useToggleSpellSlot';
 import { MagnifiedSlotPicker } from './MagnifiedSlotPicker';
 import { SlotDot } from './SlotDot';
+import { notifications } from '@mantine/notifications';
+import { openCastSpellModal } from '../overlays/openCastSpellModal';
 
 type Props = {
   characterId: string;
   spells: Spell[];
   onOpenDetails: (spell: Spell) => void;
-  onCast?: (spell: Spell) => void;
 };
 
 export function PreparedSpellList({
   characterId,
   spells,
   onOpenDetails,
-  onCast,
 }: Props) {
   const { data: slots } = useSpellSlots(characterId);
   const toggle = useToggleSpellSlot();
@@ -34,6 +34,46 @@ export function PreparedSpellList({
       </Group>
     );
   }
+
+  const handleCast = (spell: Spell) => {
+    if (!slots) {
+      notifications.show({
+        color: 'red',
+        title: 'No slot data',
+        message: 'Spell slots not loaded yet.',
+      });
+      return;
+    }
+
+    openCastSpellModal({
+      spell,
+      slots,
+      onPick: (slotLevel, slotIndex) => {
+        if (slotLevel === 0) return;
+
+        if (isBusy) return;
+        toggle.mutate(
+          { characterId, slotLevel, slotIndex },
+          {
+            onError: (err: any) => {
+              notifications.show({
+                color: 'red',
+                title: 'Failed to spend slot',
+                message: err?.message ?? 'Please try again.',
+              });
+            },
+            onSuccess: () => {
+              notifications.show({
+                color: 'teal',
+                title: 'Spell cast',
+                message: `Spent a level ${slotLevel} slot for ${spell.name}.`,
+              });
+            },
+          }
+        );
+      },
+    });
+  };
 
   const groups = spells.reduce((acc, spell) => {
     const lvl = spell.level ?? 0;
@@ -157,7 +197,7 @@ export function PreparedSpellList({
                     key={spell.id}
                     spell={spell}
                     onOpenDetails={() => onOpenDetails(spell)}
-                    onCast={onCast}
+                    onCast={() => handleCast(spell)}
                   />
                 ))}
             </Stack>

@@ -32,3 +32,16 @@ export const SCHOOLS = [
 
 export const levelLabel = (lvl: number) =>
   lvl === 0 ? 'Cantrip' : `Level ${lvl}`;
+
+export const preparedLevelLabel = [
+  { index: 0, name: 'cantrip' },
+  { index: 1, name: '1st' },
+  { index: 2, name: '2nd' },
+  { index: 3, name: '3rd' },
+  { index: 4, name: '4th' },
+  { index: 5, name: '5th' },
+  { index: 6, name: '6th' },
+  { index: 7, name: '7th' },
+  { index: 8, name: '8th' },
+  { index: 9, name: '9th' },
+];

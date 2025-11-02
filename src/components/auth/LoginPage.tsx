@@ -29,7 +29,6 @@ export function LoginPage() {
     setSubmitting(true);
     try {
       await login(email.trim(), password);
-      notifications.show({ title: 'Logged in', message: '', color: 'green' });
       navigate(from, { replace: true });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unexpected error';

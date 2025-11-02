@@ -1,11 +1,11 @@
 import { Card, Group, Text, Badge, Button, Stack } from '@mantine/core';
 import type { Spell } from '../../types/spells';
-import { notifications } from '@mantine/notifications';
+import { preparedLevelLabel } from '../../constants/dnd';
 
 type Props = {
   spell: Spell;
   onOpenDetails: () => void;
-  onCast?: (spell: Spell) => void;
+  onCast: (spell: Spell) => void;
 };
 
 export function PreparedSpellListItem({ spell, onOpenDetails, onCast }: Props) {
@@ -13,14 +13,7 @@ export function PreparedSpellListItem({ spell, onOpenDetails, onCast }: Props) {
 
   const handleCast = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onCast) {
-      onCast(spell);
-    } else {
-      notifications.show({
-        title: 'Cast spell',
-        message: `"${spell.name}" cast initiated.`,
-      });
-    }
+    onCast(spell);
   };
 
   return (
@@ -46,16 +39,13 @@ export function PreparedSpellListItem({ spell, onOpenDetails, onCast }: Props) {
               {spell.duration ? ` ${String(spell.duration).toLowerCase()}` : ''}
             </Text>
           ) : null}
+          <Group gap="xs">
+            <Button size="xs" variant="light" color="red" onClick={handleCast}>
+              Cast spell
+            </Button>
+          </Group>
         </Stack>
-
-        <Group gap="xs">
-          <Button size="xs" variant="light" onClick={handleCast}>
-            Cast spell
-          </Button>
-          <Badge variant="light">
-            {spell.level === 0 ? 'cantrip' : `Level ${spell.level}`}
-          </Badge>
-        </Group>
+        <Badge variant="light">{preparedLevelLabel[spell.level].name}</Badge>
       </Group>
     </Card>
   );
