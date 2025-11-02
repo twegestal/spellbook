@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import type { User } from '@supabase/supabase-js';
+import type { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { supabase } from '../util/authClient';
 import { AuthContext } from './auth';
 
@@ -8,38 +8,73 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const applySession = (session: Session | null) => {
+    if (session?.access_token && session.user) {
+      setToken(session.access_token);
+      setUser(session.user);
+    } else {
+      setToken(null);
+      setUser(null);
+    }
+  };
+
+  const validateOrSignOut = async () => {
+    const { data } = await supabase.auth.getSession();
+    const session = data.session ?? null;
+
+    if (!session) {
+      applySession(null);
+      return;
+    }
+
+    const { data: u, error: uErr } = await supabase.auth.getUser();
+    if (uErr || !u?.user) {
+      await supabase.auth.signOut();
+      applySession(null);
+      return;
+    }
+
+    applySession({ ...session, user: u.user });
+  };
+
   useEffect(() => {
-    const initSession = async () => {
-      const { data, error } = await supabase.auth.getSession();
-      if (error) {
-        console.error('Error getting session:', error.message);
+    (async () => {
+      try {
+        await validateOrSignOut();
+      } finally {
         setLoading(false);
-        return;
       }
-      const session = data.session;
-      if (session) {
-        setToken(session.access_token);
-        setUser(session.user);
-      }
-      setLoading(false);
-    };
+    })();
 
-    initSession();
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        if (session) {
-          setToken(session.access_token);
-          setUser(session.user);
-        } else {
-          setToken(null);
-          setUser(null);
+    const { data: sub } = supabase.auth.onAuthStateChange(
+      async (event: AuthChangeEvent, session: Session | null) => {
+        switch (event) {
+          case 'SIGNED_IN':
+          case 'TOKEN_REFRESHED':
+          case 'USER_UPDATED':
+            applySession(session);
+            break;
+          case 'SIGNED_OUT':
+          case 'PASSWORD_RECOVERY':
+            applySession(null);
+            break;
+          default:
+            await validateOrSignOut();
+            break;
         }
       }
     );
 
+    const onVisible = async () => {
+      if (document.visibilityState === 'visible') {
+        await validateOrSignOut();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisible);
+
     return () => {
-      listener?.subscription.unsubscribe();
+      sub?.subscription.unsubscribe();
+      document.removeEventListener('visibilitychange', onVisible);
     };
   }, []);
 
@@ -54,8 +89,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!data.session?.access_token || !data.session.user) {
         throw new Error('Login failed: No session returned');
       }
-      setToken(data.session.access_token);
-      setUser(data.session.user);
+      applySession(data.session);
     } finally {
       setLoading(false);
     }
@@ -81,20 +115,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       options: { emailRedirectTo: `${window.location.origin}/spells` },
     });
     if (error) throw new Error(error.message);
-
-    if (data.session?.access_token && data.session.user) {
-      setToken(data.session.access_token);
-      setUser(data.session.user);
-    } else {
-      setToken(null);
-      setUser(null);
-    }
+    applySession(data.session ?? null);
   };
 
   const logout = async () => {
     await supabase.auth.signOut();
-    setToken(null);
-    setUser(null);
+    applySession(null);
   };
 
   return (
