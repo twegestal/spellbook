@@ -8,7 +8,8 @@ import { MagnifiedSlotPicker } from './MagnifiedSlotPicker';
 import { SlotDot } from './SlotDot';
 import { notifications } from '@mantine/notifications';
 import { openCastSpellModal } from '../overlays/openCastSpellModal';
-import { fireballBlast } from '../fireball/fireballBlast';
+import { spawnDamageBlast } from '../animations/spawnDamageBlast';
+import type { DamageType } from '../animations/DamageExplosion';
 
 type Props = {
   characterId: string;
@@ -71,8 +72,9 @@ export function PreparedSpellList({
               });
             },
             onSuccess: () => {
-              if (spell.idx === 'fireball') {
-                fireballBlast();
+              const damage = spell.damage_type_name?.toLowerCase?.();
+              if (damage) {
+                spawnDamageBlast(damage as DamageType);
               }
               notifications.show({
                 color: 'teal',
