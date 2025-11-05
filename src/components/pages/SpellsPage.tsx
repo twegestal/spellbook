@@ -1,17 +1,9 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
-import {
-  ActionIcon,
-  Group,
-  Loader,
-  Stack,
-  TextInput,
-  Center,
-} from '@mantine/core';
-import { X, Filter, Search } from 'lucide-react';
+import { ActionIcon, Group, Loader, Stack, Center } from '@mantine/core';
+import { Filter } from 'lucide-react';
 import { useHeader } from '../../components/layout/AppShell/AppShellLayout';
 import { useSpells } from '../../hooks/useSpell';
 import { useSpellSearch } from '../../hooks/useSpellSearch';
-import { SpellList } from '../spell/SpellList';
 import { openSpellModal } from '../overlays/openSpellModal';
 import {
   emptyFilters,
@@ -22,16 +14,19 @@ import {
   type SpellFilters,
 } from '../../types/filters';
 import { SpellFiltersDrawer } from '../filters/SpellFilterDrawer';
+import SpellSearch from '../SpellSearch';
+import { useDebouncedValue } from '@mantine/hooks';
+import { VirtualizedSpellList } from '../VirtualizedSpellList';
 
 export default function SpellsPage() {
   const { setLeft, setRight } = useHeader();
-
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [debouncedQuery] = useDebouncedValue(query, 100);
   const [filters, setFilters] = useState<SpellFilters>(emptyFilters);
 
   const { data, isLoading } = useSpells();
-  const { spells: queryFiltered } = useSpellSearch(data, query);
+  const { spells: queryFiltered } = useSpellSearch(data, debouncedQuery);
 
   const filterSpell = useCallback((s: any, f: SpellFilters) => {
     if (f.levels.length && !f.levels.includes(s.level)) return false;
@@ -61,36 +56,7 @@ export default function SpellsPage() {
   );
 
   useEffect(() => {
-    setLeft(
-      <Group gap="xs" wrap="nowrap" w="100%">
-        <TextInput
-          placeholder="Search spells..."
-          value={query}
-          onChange={(e) => setQuery(e.currentTarget.value)}
-          leftSection={<Search size={18} style={{ opacity: 0.6 }} />}
-          rightSection={
-            query ? (
-              <ActionIcon
-                size="sm"
-                variant="subtle"
-                onClick={() => setQuery('')}
-              >
-                <X size={16} />
-              </ActionIcon>
-            ) : null
-          }
-          radius="md"
-          size="sm"
-          styles={{
-            input: {
-              minWidth: 220,
-              fontSize: 14,
-            },
-          }}
-        />
-      </Group>
-    );
-
+    setLeft(<SpellSearch initialValue={query} onChange={setQuery} />);
     setRight(
       <ActionIcon
         aria-label="Open filters"
@@ -100,7 +66,11 @@ export default function SpellsPage() {
         <Filter size={18} />
       </ActionIcon>
     );
-  }, [query, setLeft, setRight]);
+    return () => {
+      setLeft(null);
+      setRight(null);
+    };
+  }, [setLeft, setRight]);
 
   if (isLoading) {
     return (
@@ -113,7 +83,7 @@ export default function SpellsPage() {
   return (
     <>
       <Stack gap="lg">
-        <SpellList
+        <VirtualizedSpellList
           spells={filteredSpells ?? []}
           onOpenDetails={(spell) => openSpellModal(spell)}
         />

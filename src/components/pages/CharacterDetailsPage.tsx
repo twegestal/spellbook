@@ -59,6 +59,7 @@ export default function CharacterDetailsPage() {
       title: 'Take a long rest?',
       children: <Text size="sm">This will reset your spell slots.</Text>,
       labels: { confirm: 'Yes, long rest', cancel: 'Cancel' },
+      centered: true,
       onConfirm: () => {
         setShowRestOverlay(true);
         longRest.mutate(undefined, {
@@ -76,7 +77,7 @@ export default function CharacterDetailsPage() {
       <Group justify="flex-start">
         <Badge
           variant="light"
-          color="blue"
+          color="red"
           onClick={() => {
             if (longRestClickable) openLongRestConfirm();
           }}
@@ -85,7 +86,7 @@ export default function CharacterDetailsPage() {
           Long rest
         </Badge>
 
-        <Badge variant="light" color="blue">
+        <Badge variant="light" color="red">
           Short rest
         </Badge>
       </Group>
