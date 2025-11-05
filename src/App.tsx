@@ -15,8 +15,13 @@ export default function App() {
       <Global
         styles={{
           ':root': { colorScheme: 'light dark' },
-          'html, body, #root': { height: '100%' },
-          'body, #root': { background: 'var(--mantine-color-body)' },
+          'html, body, #root': {
+            height: '100dvh',
+            overflow: 'hidden',
+          },
+          'body, #root': {
+            background: 'var(--mantine-color-body)',
+          },
         }}
       />
       <ThemeBarSync />

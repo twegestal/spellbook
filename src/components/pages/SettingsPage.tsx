@@ -20,7 +20,7 @@ export default function SettingsPage() {
           <Stack gap="xs">
             <Text fw={600}>Profile</Text>
             <Text c="dimmed" fz="sm">
-              Manage your account and sign out.
+              Perhaps some account settings later
             </Text>
             <Divider my="sm" />
             <Button color="red" variant="light" onClick={logout}>
