@@ -59,7 +59,6 @@ export default function CharacterDetailsPage() {
       title: 'Take a long rest?',
       children: <Text size="sm">This will reset your spell slots.</Text>,
       labels: { confirm: 'Yes, long rest', cancel: 'Cancel' },
-      confirmProps: { color: 'blue' },
       onConfirm: () => {
         setShowRestOverlay(true);
         longRest.mutate(undefined, {
