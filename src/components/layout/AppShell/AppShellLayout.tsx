@@ -29,31 +29,15 @@ export function AppShellLayout() {
   return (
     <HeaderCtx.Provider value={headerAPI}>
       <AppShell
-        styles={{
-          root: { height: '100dvh', overflow: 'hidden' },
-          main: {
-            height: '100%',
-            overflowY: 'auto',
-            WebkitOverflowScrolling: 'touch',
-            background: 'var(--mantine-color-body)',
-          },
-        }}
         header={{ height: `calc(${HEADER_BASE}px + env(safe-area-inset-top))` }}
         footer={{
           height: `calc(${FOOTER_BASE}px + env(safe-area-inset-bottom))`,
         }}
-        padding={0}
+        padding="md"
       >
         <AppShell.Header
           px="md"
-          style={{
-            position: 'sticky',
-            top: 0,
-            zIndex: 10,
-            paddingTop: 'env(safe-area-inset-top)',
-            background: 'var(--mantine-color-body)',
-            borderBottom: '1px solid var(--mantine-color-default-border)',
-          }}
+          style={{ paddingTop: 'env(safe-area-inset-top)' }}
         >
           <Group h={HEADER_BASE} justify="space-between" wrap="nowrap">
             <Group gap="sm" wrap="nowrap">
@@ -65,28 +49,14 @@ export function AppShellLayout() {
           </Group>
         </AppShell.Header>
 
-        <AppShell.Main
-          style={{
-            paddingTop: 'var(--mantine-spacing-sm)',
-            paddingLeft: 'var(--mantine-spacing-md)',
-            paddingRight: 'var(--mantine-spacing-md)',
-            paddingBottom: `${FOOTER_BASE}px`,
-          }}
-        >
+        <AppShell.Main style={{ background: 'var(--mantine-color-body)' }}>
           <Outlet />
         </AppShell.Main>
 
         <AppShell.Footer
+          style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
           px="xs"
           py={0}
-          style={{
-            position: 'sticky',
-            bottom: 0,
-            zIndex: 10,
-            paddingBottom: 'env(safe-area-inset-bottom)',
-            background: 'var(--mantine-color-body)',
-            borderTop: '1px solid var(--mantine-color-default-border)',
-          }}
         >
           <Box w="100%" h={FOOTER_BASE} style={{ display: 'flex' }}>
             <BottomNav />
