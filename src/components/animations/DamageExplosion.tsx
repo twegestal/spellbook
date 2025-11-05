@@ -72,6 +72,8 @@ export default function DamageExplosion({
     const cy = h / 2;
     const TAU = Math.PI * 2;
     const R = (a: number, b: number) => a + Math.random() * (b - a);
+    const clamp = (v: number, a: number, b: number) =>
+      Math.max(a, Math.min(b, v));
 
     const H = {
       green: 130,
@@ -97,6 +99,7 @@ export default function DamageExplosion({
       drag: number;
       speedScale: number;
       particleGen: () => Particle;
+      updateParticle?: (p: Particle, dt: number, t01: number) => void;
       drawExtra?: (
         p: Particle,
         ctx: CanvasRenderingContext2D,
@@ -141,51 +144,93 @@ export default function DamageExplosion({
 
     const presets: Record<DamageType, Preset> = {
       acid: makeSimplePreset(H.green, {
-        buoyancy: 0.00015 * (size / 400),
+        buoyancy: 0.00025 * (size / 400),
+        drag: 0.997,
+        particleGen: () => {
+          const angle = Math.random() * TAU;
+          const speed = R(180, 520) / 1000;
+          const baseSize = R(2.6, 5.5) * (size / 420);
+          const maxLife = R(900, 1400);
+          return {
+            x: cx + R(-6, 6),
+            y: cy + R(-6, 6),
+            vx: Math.cos(angle) * speed * 0.7,
+            vy: Math.sin(angle) * speed * 0.7,
+            life: 0,
+            maxLife,
+            baseSize,
+            colorFn: (t) =>
+              hsla(H.green + R(-8, 8), 90, lerp(70, 40, t), 0.95 - t * 0.8),
+            extra: { drip: true, wobble: Math.random() * TAU },
+          };
+        },
+        updateParticle: (p, dt) => {
+          p.vy += 0.00045 * (size / 400) * dt;
+          p.vx += Math.sin(p.life * 0.01 + p.extra.wobble) * 0.00008 * dt;
+        },
         drawExtra: (p, c, t, s) => {
-          if (Math.random() < 0.3 && t < 0.8) {
-            c.fillStyle = hsla(H.green, 90, 60, 0.35 * (1 - t));
+          if (t > 0.45 && Math.random() < 0.12) {
+            c.fillStyle = hsla(H.green, 85, 55, 0.25 * (1 - t));
             c.beginPath();
-            c.arc(
-              p.x + (Math.random() - 0.5) * 4,
+            c.ellipse(
+              p.x + R(-3, 3),
               p.y + R(8, 18),
-              s * 0.5,
+              s * 1.2,
+              s * 0.6,
+              0,
               0,
               TAU
             );
             c.fill();
           }
+          c.fillStyle = `rgba(255,255,255,${(1 - t) * 0.2})`;
+          c.beginPath();
+          c.arc(p.x - s * 0.3, p.y - s * 0.3, s * 0.3, 0, TAU);
+          c.fill();
         },
       }),
 
       bludgeoning: makeSimplePreset(H.gray, {
         flashAlpha: 0.2,
-        buoyancy: 0.0001 * (size / 400),
+        buoyancy: 0.00012 * (size / 400),
         drag: 0.992,
         particleGen: () => {
           const angle = Math.random() * TAU;
           const speed = R(200, 700) / 1000;
-          const spread = R(0.5, 1.0);
-          const gray = R(35, 60);
-          const baseSize = R(2.5, 5) * (size / 430);
+          const gray = R(30, 55);
+          const baseSize = R(3.2, 6.2) * (size / 420);
           return {
             x: cx,
             y: cy,
-            vx: Math.cos(angle) * speed * spread,
-            vy: Math.sin(angle) * speed * spread,
+            vx: Math.cos(angle) * speed * 0.8,
+            vy: Math.sin(angle) * speed * 0.8,
             life: 0,
-            maxLife: R(600, 1000),
+            maxLife: R(650, 1000),
             baseSize,
             colorFn: (t) =>
               `hsla(0,0%,${gray - t * 25}%,${Math.max(0, 1 - t)})`,
-            extra: { rock: Math.random() < 0.35 },
+            extra: { rock: true, bounced: false },
           };
         },
-        drawExtra: (p, c, t, s) => {
-          if (p.extra?.rock && t < 0.8) {
-            c.fillStyle = `rgba(80,80,80,${0.4 * (1 - t)})`;
-            c.fillRect(p.x - s * 0.6, p.y - s * 0.4, s * 1.2, s * 0.8);
+        updateParticle: (p) => {
+          const floorY = cy + size * 0.28;
+          if (!p.extra.bounced && p.y > floorY) {
+            p.y = floorY;
+            p.vy *= -0.35;
+            p.vx *= 0.7;
+            p.extra.bounced = true;
           }
+        },
+        drawExtra: (p, c, t, s) => {
+          c.fillStyle = `rgba(90,90,90,${0.45 * (1 - t)})`;
+          c.beginPath();
+          c.moveTo(p.x - s * 0.7, p.y);
+          c.lineTo(p.x - s * 0.3, p.y - s * 0.6);
+          c.lineTo(p.x + s * 0.6, p.y - s * 0.2);
+          c.lineTo(p.x + s * 0.4, p.y + s * 0.5);
+          c.lineTo(p.x - s * 0.6, p.y + s * 0.3);
+          c.closePath();
+          c.fill();
         },
       }),
 
@@ -195,36 +240,63 @@ export default function DamageExplosion({
         drag: 0.992,
         particleGen: () => {
           const angle = Math.random() * TAU;
-          const speed = R(300, 850) / 1000;
-          const spread = R(0.5, 0.9);
+          const speed = R(260, 780) / 1000;
           const baseSize = R(2, 5) * (size / 420);
           return {
             x: cx + R(-4, 4),
             y: cy + R(-4, 4),
-            vx: Math.cos(angle) * speed * spread,
-            vy: Math.sin(angle) * speed * spread,
+            vx: Math.cos(angle) * speed * 0.8,
+            vy: Math.sin(angle) * speed * 0.8,
             life: 0,
-            maxLife: R(800, 1400),
+            maxLife: R(850, 1400),
             baseSize,
             colorFn: (t) =>
-              hsla(H.cyan, 80, lerp(80, 50, t), Math.max(0, 1 - t)),
-            extra: { shard: Math.random() < 0.55 },
+              hsla(H.cyan, 80, lerp(82, 52, t), Math.max(0, 1 - t)),
+            extra: { shard: Math.random() < 0.6 },
           };
         },
         drawExtra: (p, c, t, s) => {
-          c.fillStyle = `rgba(200,230,255,${(1 - t) * 0.35})`;
+          c.fillStyle = `rgba(210,235,255,${(1 - t) * 0.25})`;
           c.beginPath();
-          c.arc(p.x, p.y, s * 0.7, 0, TAU);
+          c.arc(p.x, p.y, s * 0.8, 0, TAU);
           c.fill();
           if (p.extra?.shard) {
-            c.fillStyle = 'rgba(220,240,255,0.6)';
+            c.fillStyle = 'rgba(230,245,255,0.65)';
             c.beginPath();
             c.moveTo(p.x, p.y - s);
-            c.lineTo(p.x + s * 0.7, p.y + s * 0.6);
-            c.lineTo(p.x - s * 0.7, p.y + s * 0.6);
+            c.lineTo(p.x + s * 0.75, p.y + s * 0.6);
+            c.lineTo(p.x - s * 0.75, p.y + s * 0.6);
             c.closePath();
             c.fill();
           }
+        },
+        extraFrame: (c, elapsed) => {
+          const t = clamp(elapsed / (duration * 0.6), 0, 1);
+          const r = size * lerp(0.15, 0.55, t);
+          c.save();
+          c.globalCompositeOperation = 'lighter';
+          c.strokeStyle = `rgba(220,240,255,${0.9 * (1 - t)})`;
+          c.lineWidth = Math.max(1, size / 160);
+          // outer ring
+          c.beginPath();
+          c.arc(cx, cy, r, 0, TAU);
+          c.stroke();
+          // spokes
+          const spokes = 8;
+          for (let i = 0; i < spokes; i++) {
+            const a = (i / spokes) * TAU;
+            c.beginPath();
+            c.moveTo(
+              cx + Math.cos(a) * (r * 0.7),
+              cy + Math.sin(a) * (r * 0.7)
+            );
+            c.lineTo(
+              cx + Math.cos(a) * (r * 1.05),
+              cy + Math.sin(a) * (r * 1.05)
+            );
+            c.stroke();
+          }
+          c.restore();
         },
       }),
 
@@ -235,15 +307,14 @@ export default function DamageExplosion({
         particleGen: () => {
           const angle = Math.random() * TAU;
           const speed = R(200, 900) / 1000;
-          const spread = R(0.7, 1.0);
-          const hue = R(15, 55);
           const baseSize = R(2, 6) * (size / 400);
           const maxLife = R(700, 1400);
+          const hue = R(15, 55);
           return {
             x: cx + R(-6, 6),
             y: cy + R(-6, 6),
-            vx: Math.cos(angle) * speed * spread,
-            vy: Math.sin(angle) * speed * spread,
+            vx: Math.cos(angle) * speed * 0.95,
+            vy: Math.sin(angle) * speed * 0.95,
             life: 0,
             maxLife,
             baseSize,
@@ -364,35 +435,51 @@ export default function DamageExplosion({
           const speed = R(250, 800) / 1000;
           const baseSize = R(2, 5) * (size / 430);
           return {
-            x: cx,
-            y: cy,
+            x: cx + Math.cos(angle) * R(0, size * 0.15),
+            y: cy + Math.sin(angle) * R(0, size * 0.15),
             vx: Math.cos(angle) * speed,
             vy: Math.sin(angle) * speed,
             life: 0,
             maxLife: R(700, 1200),
             baseSize,
             colorFn: (t) => hsla(H.purple, 70, 65 - t * 45, Math.max(0, 1 - t)),
-            extra: { dark: true },
+            extra: { theta: angle, curl: R(0.001, 0.003) },
           };
+        },
+        updateParticle: (p, dt, t) => {
+          const ax = cx - p.x;
+          const ay = cy - p.y;
+          const dist = Math.hypot(ax, ay) + 1e-6;
+          const pull = 0.00025 * (1 - t) * (size / 400);
+          p.vx += (ax / dist) * pull * dt;
+          p.vy += (ay / dist) * pull * dt;
+          const tangential = 0.00035 * (1 - t) * dt;
+          const tx = -(ay / dist) * tangential;
+          const ty = (ax / dist) * tangential;
+          p.vx += tx;
+          p.vy += ty;
         },
         drawExtra: (p, c, t, s) => {
           c.globalCompositeOperation = 'multiply';
-          c.fillStyle = `rgba(20,0,30,${(1 - t) * 0.25})`;
+          c.strokeStyle = `rgba(30,0,40,${(1 - t) * 0.35})`;
+          c.lineWidth = Math.max(1, s * 0.15);
           c.beginPath();
-          c.arc(p.x, p.y, s * 1.1, 0, TAU);
-          c.fill();
+          c.moveTo(p.x, p.y);
+          c.lineTo(p.x - p.vx * 10, p.y - p.vy * 10);
+          c.stroke();
           c.globalCompositeOperation = 'lighter';
         },
       }),
 
       piercing: makeSimplePreset(H.gray, {
+        // high-speed needles with line “motion blur”
         flashAlpha: 0.2,
         buoyancy: 0.0001 * (size / 400),
         drag: 0.992,
         particleGen: () => {
           const angle = Math.random() * TAU;
-          const speed = R(260, 800) / 1000;
-          const baseSize = R(2, 4.5) * (size / 440);
+          const speed = R(650, 1300) / 1000;
+          const baseSize = R(1.4, 2.2) * (size / 460);
           const gray = R(35, 60);
           return {
             x: cx,
@@ -400,40 +487,57 @@ export default function DamageExplosion({
             vx: Math.cos(angle) * speed,
             vy: Math.sin(angle) * speed,
             life: 0,
-            maxLife: R(600, 950),
+            maxLife: R(500, 850),
             baseSize,
             colorFn: (t) =>
-              `hsla(0,0%,${gray - t * 25}%,${Math.max(0, 1 - t)})`,
+              `hsla(0,0%,${gray - t * 25}%,${Math.max(0, 0.9 - t)})`,
           };
+        },
+        drawExtra: (p, c, t, s) => {
+          c.strokeStyle = `rgba(220,220,220,${1 - t})`;
+          c.lineWidth = Math.max(1, s * 0.25);
+          c.beginPath();
+          c.moveTo(p.x, p.y);
+          c.lineTo(p.x - p.vx * 16, p.y - p.vy * 16);
+          c.stroke();
         },
       }),
 
       poison: makeSimplePreset(H.green, {
         flashAlpha: 0.2,
-        buoyancy: -0.0001 * (size / 400),
+        buoyancy: -0.00006 * (size / 400),
         drag: 0.996,
         particleGen: () => {
           const angle = Math.random() * TAU;
-          const speed = R(150, 500) / 1000;
-          const baseSize = R(2, 5.5) * (size / 420);
+          const speed = R(130, 420) / 1000;
+          const baseSize = R(2.2, 5.8) * (size / 420);
           return {
-            x: cx,
-            y: cy,
+            x: cx + R(-8, 8),
+            y: cy + R(-8, 8),
             vx: Math.cos(angle) * speed,
             vy: Math.sin(angle) * speed,
             life: 0,
-            maxLife: R(900, 1500),
+            maxLife: R(950, 1600),
             baseSize,
             colorFn: (t) =>
               hsla(H.green, 80, 65 - t * 30, Math.max(0, 0.9 - t * 0.9)),
-            extra: { haze: true },
+            extra: { phase: Math.random() * TAU, bubble: Math.random() < 0.4 },
           };
         },
+        updateParticle: (p, dt) => {
+          // sideways sinusoidal drift
+          p.vx += Math.sin(p.life * 0.008 + p.extra.phase) * 0.00009 * dt;
+          // slight upward creep for haze
+          p.vy -= 0.00005 * dt;
+        },
         drawExtra: (p, c, t, s) => {
-          c.fillStyle = `rgba(100,170,90,${(1 - t) * 0.25})`;
-          c.beginPath();
-          c.arc(p.x + R(-6, 6), p.y + R(-6, 6), s * 1.2, 0, TAU);
-          c.fill();
+          if (p.extra?.bubble && Math.random() < 0.5) {
+            c.strokeStyle = `rgba(150,210,140,${0.35 * (1 - t)})`;
+            c.lineWidth = 1;
+            c.beginPath();
+            c.arc(p.x + R(-6, 6), p.y + R(-6, 6), s * 1.1, 0, TAU);
+            c.stroke();
+          }
         },
       }),
 
@@ -485,15 +589,59 @@ export default function DamageExplosion({
             maxLife: R(600, 1000),
             baseSize,
             colorFn: (t) =>
-              hsla(H.yellow, 100, 70 - t * 40, Math.max(0, 1 - t * 1.3)),
+              hsla(H.yellow, 100, 72 - t * 42, Math.max(0, 1 - t * 1.3)),
           };
+        },
+        extraFrame: (c, elapsed) => {
+          const t = clamp(elapsed / (duration * 0.6), 0, 1);
+          c.save();
+          c.globalCompositeOperation = 'lighter';
+          const rays = 10;
+          c.strokeStyle = `rgba(255,255,200,${0.8 * (1 - t)})`;
+          c.lineWidth = Math.max(1, size / 140);
+          for (let i = 0; i < rays; i++) {
+            const a = (i / rays) * TAU + Math.sin(elapsed * 0.002) * 0.15;
+            const len = size * 0.9;
+            c.beginPath();
+            c.moveTo(cx, cy);
+            c.lineTo(cx + Math.cos(a) * len, cy + Math.sin(a) * len);
+            c.stroke();
+          }
+          const rings = 3;
+          for (let r = 1; r <= rings; r++) {
+            c.strokeStyle = `rgba(255,255,230,${0.35 * (1 - t)})`;
+            c.lineWidth = 1;
+            c.beginPath();
+            c.arc(cx, cy, size * (0.15 + r * 0.12) * (1 + t * 0.3), 0, TAU);
+            c.stroke();
+          }
+          c.restore();
         },
       }),
 
       slashing: makeSimplePreset(H.gray, {
-        flashAlpha: 0.2,
+        flashAlpha: 0.25,
         buoyancy: 0.0001 * (size / 400),
         drag: 0.992,
+        extraFrame: (c, elapsed) => {
+          const t = clamp(elapsed / (duration * 0.5), 0, 1);
+          const sweeps = 3;
+          for (let i = 0; i < sweeps; i++) {
+            const phase = i * 0.8;
+            const angle =
+              Math.sin(elapsed * 0.003 + phase) * 0.9 + (i - 1) * 0.6;
+            const r = size * (0.18 + i * 0.08);
+            c.save();
+            c.translate(cx, cy);
+            c.rotate(angle);
+            c.beginPath();
+            c.strokeStyle = `rgba(230,230,240,${0.9 * (1 - t)})`;
+            c.lineWidth = Math.max(2, size / 70);
+            c.arc(0, 0, r, -0.6, 0.6);
+            c.stroke();
+            c.restore();
+          }
+        },
       }),
 
       thunder: makeSimplePreset(H.indigo, {
@@ -570,6 +718,10 @@ export default function DamageExplosion({
       for (const p of parts) {
         p.life += dt;
 
+        const t01 = Math.min(1, p.life / p.maxLife);
+
+        cfg.updateParticle?.(p, dt, t01);
+
         p.vy += cfg.buoyancy * dt;
         p.vx *= cfg.drag;
         p.vy *= cfg.drag;
@@ -577,7 +729,6 @@ export default function DamageExplosion({
         p.x += p.vx * dt;
         p.y += p.vy * dt;
 
-        const t01 = Math.min(1, p.life / p.maxLife);
         const s = p.baseSize * (1 + 1.5 * (1 - t01));
         ctx.fillStyle = p.colorFn(t01);
         ctx.beginPath();
