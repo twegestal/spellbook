@@ -37,4 +37,6 @@ export const slotsApi = (apiClient: typeof ky) => ({
         slotIndex: number;
         spent: boolean;
       }>(),
+  longRest: (id: string) =>
+    apiClient.post(`slots/${id}/rest/long`).json<{ ok: boolean }>(),
 });

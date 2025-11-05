@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Alert,
@@ -10,13 +10,17 @@ import {
   Divider,
   Group,
   Badge,
+  Box,
+  LoadingOverlay,
 } from '@mantine/core';
+import { openConfirmModal } from '@mantine/modals';
 import { AlertCircle } from 'lucide-react';
 import { useHeader } from '../../components/layout/AppShell/AppShellLayout';
 import {
   useCharacterKnownSpells,
   useCharacterPreparedSpells,
 } from '../../hooks/useCharacters';
+import { useSpellSlots, useLongRest } from '../../hooks/useSpellSlots';
 import { openSpellModal } from '../overlays/openSpellModal';
 import { KnownSpellList } from '../spell/KnownSpellList';
 import { PreparedSpellList } from '../spell/PreparedSpellList';
@@ -24,6 +28,11 @@ import { PreparedSpellList } from '../spell/PreparedSpellList';
 export default function CharacterDetailsPage() {
   const { setLeft, setRight } = useHeader();
   const { id = '' } = useParams<{ id: string }>();
+
+  const slotsQuery = useSpellSlots(id);
+  const longRest = useLongRest(id);
+
+  const [showRestOverlay, setShowRestOverlay] = useState(false);
 
   const {
     data: knownSpells,
@@ -40,18 +49,49 @@ export default function CharacterDetailsPage() {
   } = useCharacterPreparedSpells(id);
 
   useEffect(() => {
+    if (showRestOverlay && !longRest.isPending && !slotsQuery.isFetching) {
+      setShowRestOverlay(false);
+    }
+  }, [showRestOverlay, longRest.isPending, slotsQuery.isFetching]);
+
+  const openLongRestConfirm = useCallback(() => {
+    openConfirmModal({
+      title: 'Take a long rest?',
+      children: <Text size="sm">This will reset your spell slots.</Text>,
+      labels: { confirm: 'Yes, long rest', cancel: 'Cancel' },
+      confirmProps: { color: 'blue' },
+      onConfirm: () => {
+        setShowRestOverlay(true);
+        longRest.mutate(undefined, {
+          onError: () => setShowRestOverlay(false),
+        });
+      },
+    });
+  }, [longRest]);
+
+  const longRestClickable = !showRestOverlay && !longRest.isPending;
+
+  useEffect(() => {
     setLeft(<Text fw={600}>Spellbook</Text>);
     setRight(
       <Group justify="flex-start">
-        <Badge variant="light" color="blue">
+        <Badge
+          variant="light"
+          color="blue"
+          onClick={() => {
+            if (longRestClickable) openLongRestConfirm();
+          }}
+          style={{ cursor: longRestClickable ? 'pointer' : 'default' }}
+        >
           Long rest
         </Badge>
+
         <Badge variant="light" color="blue">
           Short rest
         </Badge>
       </Group>
     );
-  }, [setLeft, setRight]);
+  }, [setLeft, setRight, longRestClickable, openLongRestConfirm]);
 
   const sortedKnownSpells = useMemo(() => {
     const arr = knownSpells ? [...knownSpells] : [];
@@ -96,40 +136,45 @@ export default function CharacterDetailsPage() {
   }
 
   return (
-    <Stack gap="md">
-      <Tabs defaultValue="known" variant="outline" radius="md">
-        <Tabs.List>
-          <Tabs.Tab value="known">Known</Tabs.Tab>
-          <Tabs.Tab value="prepared">Prepared</Tabs.Tab>
-        </Tabs.List>
+    <Box pos="relative" mih="50vh">
+      <LoadingOverlay visible={showRestOverlay} zIndex={1000} />
+      <Stack gap="md">
+        <Tabs defaultValue="known" variant="outline" radius="md">
+          <Tabs.List>
+            <Tabs.Tab value="known">Known</Tabs.Tab>
+            <Tabs.Tab value="prepared">Prepared</Tabs.Tab>
+          </Tabs.List>
 
-        <Divider my="sm" />
+          <Divider my="sm" />
 
-        <Tabs.Panel value="known">
-          {sortedKnownSpells.length > 0 ? (
-            <KnownSpellList
-              characterId={id}
-              spells={sortedKnownSpells}
-              preparedSet={preparedSet}
-              onOpenDetails={(spell) => openSpellModal(spell)}
-            />
-          ) : (
-            <Text c="dimmed">This character doesn’t know any spells yet.</Text>
-          )}
-        </Tabs.Panel>
+          <Tabs.Panel value="known">
+            {sortedKnownSpells.length > 0 ? (
+              <KnownSpellList
+                characterId={id}
+                spells={sortedKnownSpells}
+                preparedSet={preparedSet}
+                onOpenDetails={(spell) => openSpellModal(spell)}
+              />
+            ) : (
+              <Text c="dimmed">
+                This character doesn’t know any spells yet.
+              </Text>
+            )}
+          </Tabs.Panel>
 
-        <Tabs.Panel value="prepared">
-          {preparedSpells && preparedSpells.length > 0 ? (
-            <PreparedSpellList
-              characterId={id}
-              spells={preparedSpells}
-              onOpenDetails={(spell) => openSpellModal(spell)}
-            />
-          ) : (
-            <Text c="dimmed">No spells are prepared.</Text>
-          )}
-        </Tabs.Panel>
-      </Tabs>
-    </Stack>
+          <Tabs.Panel value="prepared">
+            {preparedSpells && preparedSpells.length > 0 ? (
+              <PreparedSpellList
+                characterId={id}
+                spells={preparedSpells}
+                onOpenDetails={(spell) => openSpellModal(spell)}
+              />
+            ) : (
+              <Text c="dimmed">No spells are prepared.</Text>
+            )}
+          </Tabs.Panel>
+        </Tabs>
+      </Stack>
+    </Box>
   );
 }

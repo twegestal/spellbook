@@ -56,11 +56,6 @@ export function PreparedSpellList({
           if (damage) {
             spawnDamageBlast(damage as DamageType);
           }
-          notifications.show({
-            color: 'green',
-            title: 'Spell cast',
-            message: `Cast ${spell.name}`,
-          });
           return;
         }
 
@@ -80,11 +75,6 @@ export function PreparedSpellList({
               if (damage) {
                 spawnDamageBlast(damage as DamageType);
               }
-              notifications.show({
-                color: 'teal',
-                title: 'Spell cast',
-                message: `Spent a level ${slotLevel} slot for ${spell.name}.`,
-              });
             },
           }
         );

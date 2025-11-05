@@ -1,4 +1,5 @@
 import { useApi } from './useApi';
+import { useAuthedMutation } from './useAuthedMutation';
 import { useAuthedQuery } from './useAuthedQuery';
 
 type PreparedLevel = { slotLevel: number; remaining: number; maximum: number };
@@ -38,5 +39,18 @@ export function useSpellSlots(characterId: string | undefined) {
       });
       return { kind: 'prepared', byLevel } as SpellSlotsPrepared;
     },
+  });
+}
+
+export function useLongRest(characterId: string | undefined) {
+  const longRestApi = useApi('longRest');
+
+  return useAuthedMutation<{ ok: boolean }, Error, void>({
+    mutationKey: ['longRest', characterId],
+    mutationFn: async () => {
+      if (!characterId) throw new Error('Missing characterId');
+      return longRestApi(characterId);
+    },
+    invalidateKeys: characterId ? [['slots', characterId]] : [],
   });
 }
