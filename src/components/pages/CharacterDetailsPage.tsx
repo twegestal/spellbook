@@ -8,8 +8,6 @@ import {
   Tabs,
   Text,
   Divider,
-  Group,
-  Badge,
   Box,
   LoadingOverlay,
 } from '@mantine/core';
@@ -24,6 +22,7 @@ import { useSpellSlots, useLongRest } from '../../hooks/useSpellSlots';
 import { openSpellModal } from '../overlays/openSpellModal';
 import { KnownSpellList } from '../spell/KnownSpellList';
 import { PreparedSpellList } from '../spell/PreparedSpellList';
+import { RestPanel } from '../spell/RestPanel';
 
 export default function CharacterDetailsPage() {
   const { setLeft, setRight } = useHeader();
@@ -73,24 +72,7 @@ export default function CharacterDetailsPage() {
 
   useEffect(() => {
     setLeft(<Text fw={600}>Spellbook</Text>);
-    setRight(
-      <Group justify="flex-start">
-        <Badge
-          variant="light"
-          color="red"
-          onClick={() => {
-            if (longRestClickable) openLongRestConfirm();
-          }}
-          style={{ cursor: longRestClickable ? 'pointer' : 'default' }}
-        >
-          Long rest
-        </Badge>
-
-        <Badge variant="light" color="red">
-          Short rest
-        </Badge>
-      </Group>
-    );
+    setRight(null);
   }, [setLeft, setRight, longRestClickable, openLongRestConfirm]);
 
   const sortedKnownSpells = useMemo(() => {
@@ -143,6 +125,7 @@ export default function CharacterDetailsPage() {
           <Tabs.List>
             <Tabs.Tab value="known">Known</Tabs.Tab>
             <Tabs.Tab value="prepared">Prepared</Tabs.Tab>
+            <Tabs.Tab value="rest">Remaining slots</Tabs.Tab>
           </Tabs.List>
 
           <Divider my="sm" />
@@ -172,6 +155,15 @@ export default function CharacterDetailsPage() {
             ) : (
               <Text c="dimmed">No spells are prepared.</Text>
             )}
+          </Tabs.Panel>
+          <Tabs.Panel value="rest">
+            <RestPanel
+              longRestClickable={longRestClickable}
+              onLongRest={openLongRestConfirm}
+              onShortRest={() => {}}
+              slots={slotsQuery.data}
+              slotsLoading={slotsQuery.isLoading || slotsQuery.isFetching}
+            />
           </Tabs.Panel>
         </Tabs>
       </Stack>

@@ -7,7 +7,7 @@ import { ThemeBarSync } from './components/ThemeBarSync';
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 import '@mantine/dates/styles.css';
-import './index.css';
+import './styles/index.css';
 
 export default function App() {
   return (

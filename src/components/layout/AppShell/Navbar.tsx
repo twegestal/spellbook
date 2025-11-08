@@ -1,6 +1,6 @@
 import { Divider, NavLink, ScrollArea } from '@mantine/core';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LogOut, Settings, SquarePlus, Users, BookOpen } from 'lucide-react';
+import { LogOut, Settings, Users, BookOpen } from 'lucide-react';
 import { useAuth } from '../../../context/auth';
 
 type Props = {
@@ -32,12 +32,6 @@ export function NavBar({ close }: Props) {
         leftSection={<Users size={18} />}
         active={isActive('/characters')}
         onClick={go('/characters')}
-      />
-      <NavLink
-        label="Create character"
-        leftSection={<SquarePlus size={18} />}
-        active={isActive('/characters/new')}
-        onClick={go('/characters/new')}
       />
 
       <Divider my="xs" />

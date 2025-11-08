@@ -1,0 +1,24 @@
+.tile {
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.tile:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--mantine-shadow-md);
+}
+
+.tile:active {
+  transform: translateY(0);
+  box-shadow: var(--mantine-shadow-sm);
+}
+
+.tileDisabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.tileDisabled:hover {
+  transform: none;
+  box-shadow: var(--mantine-shadow-sm);
+}

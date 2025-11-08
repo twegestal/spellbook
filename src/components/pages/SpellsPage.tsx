@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
-import { ActionIcon, Group, Loader, Stack, Center } from '@mantine/core';
+import { ActionIcon, Loader, Stack, Center } from '@mantine/core';
 import { Filter } from 'lucide-react';
 import { useHeader } from '../../components/layout/AppShell/AppShellLayout';
 import { useSpells } from '../../hooks/useSpell';
