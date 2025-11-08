@@ -10,7 +10,7 @@ type Props = {
 
 export function VirtualizedSpellList({ spells, onOpenDetails }: Props) {
   return (
-    <Stack gap="sm" h="calc(100vh - 200px)">
+    <Stack gap="sm" h="calc(100vh - 20px)">
       <Virtuoso
         style={{ height: '100%' }}
         data={spells}
