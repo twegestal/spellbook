@@ -9,6 +9,7 @@ import {
   TextInput,
   rem,
   Alert,
+  Card,
 } from '@mantine/core';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -19,7 +20,7 @@ import { AlertCircle } from 'lucide-react';
 
 export default function CreateCharacterPage() {
   const navigate = useNavigate();
-  const { setLeft } = useHeader();
+  const { setLeft, setRight } = useHeader();
 
   const { data: racesData, isLoading: loadingRaces } = useRaces();
   const { data: classesData, isLoading: loadingClasses } = useClasses();
@@ -33,7 +34,8 @@ export default function CreateCharacterPage() {
 
   useEffect(() => {
     setLeft(<Text fw={600}>Create Character</Text>);
-  }, [setLeft]);
+    setRight(null);
+  }, [setLeft, setRight]);
 
   const races = useMemo(
     () => (racesData ?? []).map((r) => ({ label: r.name, value: r.name })),
@@ -80,69 +82,73 @@ export default function CreateCharacterPage() {
   }
 
   return (
-    <Box p="lg" pb={rem(96)}>
+    <Box p="lg">
       <Stack maw={400} mx="auto" gap="lg">
-        <TextInput
-          label="Name"
-          placeholder="Character name"
-          value={name}
-          onChange={(e) => setName(e.currentTarget.value)}
-          error={errors.name}
-        />
+        <Card withBorder padding="lg" radius="md">
+          <Stack gap="md">
+            <TextInput
+              label="Name"
+              placeholder="Character name"
+              value={name}
+              onChange={(e) => setName(e.currentTarget.value)}
+              error={errors.name}
+            />
 
-        <Select
-          label="Race"
-          placeholder="Select race"
-          data={races}
-          value={race}
-          onChange={setRace}
-          searchable
-          nothingFoundMessage="No races"
-          error={errors.race}
-        />
+            <Select
+              label="Race"
+              placeholder="Select race"
+              data={races}
+              value={race}
+              onChange={setRace}
+              searchable
+              nothingFoundMessage="No races"
+              error={errors.race}
+            />
 
-        <Select
-          label="Class"
-          placeholder="Select class"
-          data={classes}
-          value={charClass}
-          onChange={setCharClass}
-          searchable
-          nothingFoundMessage="No classes"
-          error={errors.class}
-        />
+            <Select
+              label="Class"
+              placeholder="Select class"
+              data={classes}
+              value={charClass}
+              onChange={setCharClass}
+              searchable
+              nothingFoundMessage="No classes"
+              error={errors.class}
+            />
 
-        <NumberInput
-          label="Level"
-          min={1}
-          max={20}
-          value={level}
-          onChange={(val) =>
-            setLevel(Math.max(1, Math.min(20, Number(val) || 1)))
-          }
-          error={errors.level}
-        />
+            <NumberInput
+              label="Level"
+              min={1}
+              max={20}
+              value={level}
+              onChange={(val) =>
+                setLevel(Math.max(1, Math.min(20, Number(val) || 1)))
+              }
+              error={errors.level}
+            />
 
-        {isError && (
-          <Alert
-            icon={<AlertCircle size={16} />}
-            color="red"
-            variant="light"
-            title="Failed to create character"
-          >
-            {(error as Error)?.message ?? 'Unknown error'}
-          </Alert>
-        )}
+            {isError && (
+              <Alert
+                icon={<AlertCircle size={16} />}
+                color="red"
+                variant="light"
+                title="Failed to create character"
+              >
+                {(error as Error)?.message ?? 'Unknown error'}
+              </Alert>
+            )}
 
-        <Button
-          onClick={onCreate}
-          loading={isPending}
-          fullWidth
-          size="md"
-          radius="md"
-        >
-          {isPending ? 'Creating…' : 'Create'}
-        </Button>
+            <Button
+              onClick={onCreate}
+              loading={isPending}
+              fullWidth
+              size="md"
+              radius="md"
+            >
+              {isPending ? 'Creating…' : 'Create'}
+            </Button>
+          </Stack>
+        </Card>
       </Stack>
     </Box>
   );
