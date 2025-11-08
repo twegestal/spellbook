@@ -1,3 +1,5 @@
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { modals } from '@mantine/modals';
 import { Badge, Button, Divider, Group, Stack, Text } from '@mantine/core';
 import type { Spell } from '../../types/spells';
@@ -11,6 +13,18 @@ function SpellDetails({
   onClose: () => void;
 }) {
   const levelLabel = spell.level === 0 ? 'Cantrip' : `Level ${spell.level}`;
+  function normalizeMarkdownTables(source: string) {
+    return source
+      .replace(/^\s+\|/gm, '|')
+      .replace(/\n[ \t]*\n(?=\|)/g, '\n')
+      .replace(/(\|[-:| ]+\|)\n{2,}/g, '$1\n');
+  }
+
+  const raw = Array.isArray(spell.description)
+    ? spell.description.join('\n\n')
+    : spell.description ?? '';
+
+  const markdown = normalizeMarkdownTables(raw);
 
   return (
     <Stack gap="sm">
@@ -106,16 +120,45 @@ function SpellDetails({
         </Group>
       )}
 
-      {spell.description && (
-        <Stack gap={4} mt="sm">
-          {(Array.isArray(spell.description)
-            ? spell.description
-            : [spell.description]
-          ).map((p, i) => (
-            <Text key={i} fz="sm">
-              {p}
-            </Text>
-          ))}
+      {markdown && (
+        <Stack gap="sm" mt="sm">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              p: ({ children }) => (
+                <p style={{ fontSize: '0.875rem', marginBottom: '0.5em' }}>
+                  {children}
+                </p>
+              ),
+              table: ({ children }) => (
+                <div style={{ overflowX: 'auto', marginTop: '0.5em' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    {children}
+                  </table>
+                </div>
+              ),
+              th: ({ children }) => (
+                <th
+                  style={{
+                    borderBottom: '1px solid #ccc',
+                    textAlign: 'left',
+                    padding: '4px 6px',
+                  }}
+                >
+                  {children}
+                </th>
+              ),
+              td: ({ children }) => (
+                <td
+                  style={{ borderBottom: '1px solid #eee', padding: '4px 6px' }}
+                >
+                  {children}
+                </td>
+              ),
+            }}
+          >
+            {markdown}
+          </ReactMarkdown>
         </Stack>
       )}
 
