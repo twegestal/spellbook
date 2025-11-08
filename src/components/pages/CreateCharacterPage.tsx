@@ -7,7 +7,6 @@ import {
   Stack,
   Text,
   TextInput,
-  rem,
   Alert,
   Card,
 } from '@mantine/core';

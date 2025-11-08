@@ -1,7 +1,12 @@
-:root { color-scheme: light dark; }
+:root {
+  color-scheme: light dark;
 
-/* Full-height root so AppShell occupies viewport */
+  --safe-top: env(safe-area-inset-top);
+  --safe-right: env(safe-area-inset-right);
+  --safe-bottom: env(safe-area-inset-bottom);
+  --safe-left: env(safe-area-inset-left);
+}
+
 html, body, #root { height: 100%; }
 
-/* Mantine body background (no inline style) */
 body { background: var(--mantine-color-body); }

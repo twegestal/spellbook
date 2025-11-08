@@ -27,14 +27,14 @@ export function AppShellLayout() {
     <HeaderCtx.Provider value={headerAPI}>
       <AppShell
         padding="md"
-        header={{ height: 60 }}
+        header={{ height: 'calc(60px + var(--safe-top))' }}
         navbar={{
           width: 280,
           breakpoint: 'sm',
           collapsed: { mobile: !opened },
         }}
       >
-        <AppShell.Header>
+        <AppShell.Header px="md" style={{ paddingTop: 'var(--safe-top)' }}>
           <Group h="100%" px="md" justify="space-between" wrap="nowrap">
             <Group wrap="nowrap" gap="sm">
               <Burger
