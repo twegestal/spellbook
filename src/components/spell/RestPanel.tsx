@@ -86,7 +86,7 @@ export function RestPanel({
           }}
         >
           <Group align="center" gap="sm" wrap="nowrap">
-            <FlameKindling size={22} color="var(--mantine-color-red-5)" />
+            <BedDouble size={22} color="var(--mantine-color-red-5)" />
             <Text fw={500}>Long rest</Text>
           </Group>
         </Card>
@@ -101,13 +101,12 @@ export function RestPanel({
           onKeyDown={(e) => e.key === 'Enter' && onShortRest?.()}
         >
           <Group align="center" gap="sm" wrap="nowrap">
-            <BedDouble size={22} color="var(--mantine-color-red-5)" />
+            <FlameKindling size={22} color="var(--mantine-color-red-5)" />
             <Text fw={500}>Short rest</Text>
           </Group>
         </Card>
       </Group>
 
-      {/* Slots */}
       <Paper withBorder radius="md" p="md">
         <Group justify="space-between" mb="sm">
           <Text fw={600}>Spell slots</Text>

@@ -51,6 +51,11 @@ export function useLongRest(characterId: string | undefined) {
       if (!characterId) throw new Error('Missing characterId');
       return longRestApi(characterId);
     },
-    invalidateKeys: characterId ? [['slots', characterId]] : [],
+    invalidateKeys: characterId
+      ? [
+          ['slots', characterId],
+          ['sorceryPoints', characterId],
+        ]
+      : [],
   });
 }

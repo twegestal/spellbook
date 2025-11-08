@@ -17,16 +17,25 @@ import { useHeader } from '../../components/layout/AppShell/AppShellLayout';
 import {
   useCharacterKnownSpells,
   useCharacterPreparedSpells,
+  useCharacters,
 } from '../../hooks/useCharacters';
 import { useSpellSlots, useLongRest } from '../../hooks/useSpellSlots';
 import { openSpellModal } from '../overlays/openSpellModal';
 import { KnownSpellList } from '../spell/KnownSpellList';
 import { PreparedSpellList } from '../spell/PreparedSpellList';
 import { RestPanel } from '../spell/RestPanel';
+import { MetamagicPanel } from '../sorcery/MetamagicPanel';
 
 export default function CharacterDetailsPage() {
   const { setLeft, setRight } = useHeader();
   const { id = '' } = useParams<{ id: string }>();
+  const { data: characters } = useCharacters();
+
+  const character = characters?.find((c) => c.id === id);
+  const className = character?.class?.toLowerCase() ?? '';
+  const isSorcerer = className === 'sorcerer';
+  const isWizard = className === 'wizard';
+  const isCleric = className === 'cleric';
 
   const slotsQuery = useSpellSlots(id);
   const longRest = useLongRest(id);
@@ -121,10 +130,18 @@ export default function CharacterDetailsPage() {
     <Box pos="relative" mih="50vh">
       <LoadingOverlay visible={showRestOverlay} zIndex={1000} />
       <Stack gap="md">
-        <Tabs defaultValue="known" variant="outline" radius="md">
+        <Tabs
+          defaultValue={isSorcerer ? 'known' : 'known'}
+          variant="outline"
+          radius="md"
+        >
           <Tabs.List>
-            <Tabs.Tab value="known">Known</Tabs.Tab>
-            <Tabs.Tab value="prepared">Prepared</Tabs.Tab>
+            <Tabs.Tab value="known">Spells</Tabs.Tab>
+            {isSorcerer ? (
+              <Tabs.Tab value="sorcery">Metamagic</Tabs.Tab>
+            ) : (
+              <Tabs.Tab value="prepared">Prepared</Tabs.Tab>
+            )}
             <Tabs.Tab value="rest">Remaining slots</Tabs.Tab>
           </Tabs.List>
 
@@ -145,17 +162,26 @@ export default function CharacterDetailsPage() {
             )}
           </Tabs.Panel>
 
-          <Tabs.Panel value="prepared">
-            {preparedSpells && preparedSpells.length > 0 ? (
-              <PreparedSpellList
-                characterId={id}
-                spells={preparedSpells}
-                onOpenDetails={(spell) => openSpellModal(spell)}
-              />
-            ) : (
-              <Text c="dimmed">No spells are prepared.</Text>
-            )}
-          </Tabs.Panel>
+          {!isSorcerer && (
+            <Tabs.Panel value="prepared">
+              {preparedSpells && preparedSpells.length > 0 ? (
+                <PreparedSpellList
+                  characterId={id}
+                  spells={preparedSpells}
+                  onOpenDetails={(spell) => openSpellModal(spell)}
+                />
+              ) : (
+                <Text c="dimmed">No spells are prepared.</Text>
+              )}
+            </Tabs.Panel>
+          )}
+
+          {isSorcerer && (
+            <Tabs.Panel value="sorcery">
+              <MetamagicPanel characterId={id} />
+            </Tabs.Panel>
+          )}
+
           <Tabs.Panel value="rest">
             <RestPanel
               longRestClickable={longRestClickable}
