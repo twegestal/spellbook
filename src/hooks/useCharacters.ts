@@ -209,6 +209,8 @@ export const useUpdateCharacterLevel = () => {
     onSettled: (_data, _err, vars) => {
       qc.invalidateQueries({ queryKey: ['characters'] });
       qc.invalidateQueries({ queryKey: ['characters', vars.characterId] });
+      qc.invalidateQueries({ queryKey: ['sorceryPoints'] });
+      qc.invalidateQueries({ queryKey: ['slots'] });
     },
   });
 };

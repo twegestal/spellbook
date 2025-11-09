@@ -130,11 +130,7 @@ export default function CharacterDetailsPage() {
     <Box pos="relative" mih="50vh">
       <LoadingOverlay visible={showRestOverlay} zIndex={1000} />
       <Stack gap="md">
-        <Tabs
-          defaultValue={isSorcerer ? 'known' : 'known'}
-          variant="outline"
-          radius="md"
-        >
+        <Tabs defaultValue="known" variant="outline" radius="md">
           <Tabs.List>
             <Tabs.Tab value="known">Spells</Tabs.Tab>
             {isSorcerer ? (
@@ -149,12 +145,20 @@ export default function CharacterDetailsPage() {
 
           <Tabs.Panel value="known">
             {sortedKnownSpells.length > 0 ? (
-              <KnownSpellList
-                characterId={id}
-                spells={sortedKnownSpells}
-                preparedSet={preparedSet}
-                onOpenDetails={(spell) => openSpellModal(spell)}
-              />
+              isSorcerer ? (
+                <PreparedSpellList
+                  characterId={id}
+                  spells={sortedKnownSpells}
+                  onOpenDetails={(spell) => openSpellModal(spell)}
+                />
+              ) : (
+                <KnownSpellList
+                  characterId={id}
+                  spells={sortedKnownSpells}
+                  preparedSet={preparedSet}
+                  onOpenDetails={(spell) => openSpellModal(spell)}
+                />
+              )
             ) : (
               <Text c="dimmed">
                 This character doesn’t know any spells yet.
