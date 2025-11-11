@@ -10,6 +10,7 @@ import {
   Button,
   ActionIcon,
   Tooltip,
+  Loader,
 } from '@mantine/core';
 import { useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
@@ -52,6 +53,7 @@ export function MetamagicPanel({ characterId }: Props) {
   );
 
   const [addOpen, setAddOpen] = useState(false);
+  const [removingIdx, setRemovingIdx] = useState<string | null>(null);
 
   const handleSpend = (amount: number) => {
     if (amount <= 0 || amount > remaining) return;
@@ -59,17 +61,31 @@ export function MetamagicPanel({ characterId }: Props) {
   };
 
   const handleAdd = (idx: string) => {
-    addKnown.mutate({ idx }, { onSuccess: () => setAddOpen(false) });
+    addKnown.mutate(
+      { idx },
+      {
+        onSuccess: () => setAddOpen(false),
+      }
+    );
   };
 
   const handleRemove = (idx: string) => {
-    delKnown.mutate({ idx });
+    setRemovingIdx(idx);
+    delKnown.mutate(
+      { idx },
+      {
+        onSettled: () => setRemovingIdx(null),
+      }
+    );
   };
 
   const loadingAny = sp.isLoading || catalogLoading || knownLoading;
 
+  const addDisabled = !availableOptions.length || addKnown.isPending;
+
   return (
     <Stack gap="md">
+      {/* Sorcery points summary */}
       <Paper withBorder radius="md" p="md">
         <Group justify="space-between" mb="sm">
           <Text fw={600}>Sorcery points</Text>
@@ -89,6 +105,7 @@ export function MetamagicPanel({ characterId }: Props) {
         </Text>
       </Paper>
 
+      {/* Metamagic list */}
       <Paper withBorder radius="md" p="md">
         <Group justify="space-between" mb="sm">
           <Text fw={600}>Metamagic</Text>
@@ -100,10 +117,19 @@ export function MetamagicPanel({ characterId }: Props) {
           </Text>
         ) : (
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+            {/* Known cards */}
             {knownOptions.map((m) => {
               const canAfford = remaining >= m.cost && !spend.isPending;
+              const isRemovingThis = removingIdx === m.__idx;
+
               return (
-                <Card key={m.__idx} withBorder radius="md" p="md">
+                <Card
+                  key={m.__idx}
+                  withBorder
+                  radius="md"
+                  p="md"
+                  style={isRemovingThis ? { opacity: 0.6 } : undefined}
+                >
                   <Group justify="space-between" mb={4} align="start">
                     <Text fw={600}>{m.name}</Text>
                     <Group gap="xs">
@@ -115,19 +141,25 @@ export function MetamagicPanel({ characterId }: Props) {
                           variant="subtle"
                           color="red"
                           onClick={() => handleRemove(m.__idx)}
-                          disabled={delKnown.isPending}
+                          disabled={delKnown.isPending || isRemovingThis}
                           aria-label={`Remove ${m.name}`}
                         >
-                          <Trash2 size={16} />
+                          {isRemovingThis ? (
+                            <Loader size="xs" />
+                          ) : (
+                            <Trash2 size={16} />
+                          )}
                         </ActionIcon>
                       </Tooltip>
                     </Group>
                   </Group>
+
                   {m.description && (
                     <Text size="sm" c="dimmed" mb="sm">
                       {m.description}
                     </Text>
                   )}
+
                   <Group justify="end">
                     <Button
                       size="xs"
@@ -148,17 +180,25 @@ export function MetamagicPanel({ characterId }: Props) {
               withBorder
               radius="md"
               p="md"
-              onClick={() => setAddOpen(true)}
+              onClick={() => !addDisabled && setAddOpen(true)}
               style={{
-                cursor: availableOptions.length ? 'pointer' : 'default',
+                cursor: addDisabled ? 'default' : 'pointer',
+                opacity: addDisabled ? 0.6 : 1,
+                transition: 'opacity 120ms ease',
               }}
             >
               <Group justify="center" mih={64}>
                 <Group gap="xs" align="center">
-                  <Plus size={18} />
+                  {addKnown.isPending ? (
+                    <Loader size="sm" />
+                  ) : (
+                    <Plus size={18} />
+                  )}
                   <Text fw={600}>
                     {availableOptions.length
-                      ? 'Add metamagic'
+                      ? addKnown.isPending
+                        ? 'Adding…'
+                        : 'Add metamagic'
                       : 'No more options'}
                   </Text>
                 </Group>
@@ -173,6 +213,7 @@ export function MetamagicPanel({ characterId }: Props) {
         onClose={() => setAddOpen(false)}
         options={availableOptions}
         onPick={handleAdd}
+        busy={addKnown.isPending}
       />
     </Stack>
   );
