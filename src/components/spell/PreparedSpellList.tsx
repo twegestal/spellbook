@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Stack, Text, Divider, Group } from '@mantine/core';
+import { Stack, Text, Group } from '@mantine/core';
 import type { Spell } from '../../types/spells';
 import { PreparedSpellListItem } from './PreparedSpellListItem';
 import { useSpellSlots } from '../../hooks/useSpellSlots';
@@ -208,8 +208,6 @@ export function PreparedSpellList({
                   />
                 ))}
             </Stack>
-
-            {i < sortedLevels.length - 1 && <Divider />}
           </Stack>
         ))}
       </Stack>

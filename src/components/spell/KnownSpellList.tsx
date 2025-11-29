@@ -1,4 +1,4 @@
-import { Stack, Text, Divider, Group } from '@mantine/core';
+import { Stack, Text, Group } from '@mantine/core';
 import type { Spell } from '../../types/spells';
 import { KnownSpellListItem } from './KnownSpellListItem';
 
@@ -59,8 +59,6 @@ export function KnownSpellList({
                 />
               ))}
           </Stack>
-
-          {i < sortedLevels.length - 1 && <Divider />}
         </Stack>
       ))}
     </Stack>

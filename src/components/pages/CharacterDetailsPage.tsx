@@ -7,7 +7,6 @@ import {
   Stack,
   Tabs,
   Text,
-  Divider,
   Box,
   LoadingOverlay,
 } from '@mantine/core';
@@ -131,7 +130,7 @@ export default function CharacterDetailsPage() {
       <LoadingOverlay visible={showRestOverlay} zIndex={1000} />
       <Stack gap="md">
         <Tabs defaultValue="known" variant="outline" radius="md">
-          <Tabs.List>
+          <Tabs.List mb={'lg'}>
             <Tabs.Tab value="known">Spells</Tabs.Tab>
             {isSorcerer ? (
               <Tabs.Tab value="sorcery">Metamagic</Tabs.Tab>
@@ -140,8 +139,6 @@ export default function CharacterDetailsPage() {
             )}
             <Tabs.Tab value="rest">Remaining slots</Tabs.Tab>
           </Tabs.List>
-
-          <Divider my="sm" />
 
           <Tabs.Panel value="known">
             {sortedKnownSpells.length > 0 ? (
