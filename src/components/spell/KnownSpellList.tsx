@@ -40,7 +40,7 @@ export function KnownSpellList({
       gap="md"
       style={{ listStyle: 'none', padding: 0, margin: 0 }}
     >
-      {sortedLevels.map((lvl, i) => (
+      {sortedLevels.map((lvl, _i) => (
         <Stack key={lvl} gap="xs">
           <Text fz="xs" tt="uppercase" c="dimmed" fw={600}>
             {lvl === 0 ? 'Cantrips' : `Level ${lvl}`}

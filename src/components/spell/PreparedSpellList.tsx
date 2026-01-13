@@ -187,7 +187,7 @@ export function PreparedSpellList({
         gap="md"
         style={{ listStyle: 'none', padding: 0, margin: 0 }}
       >
-        {sortedLevels.map((lvl, i) => (
+        {sortedLevels.map((lvl, _i) => (
           <Stack key={lvl} gap="xs">
             <Group justify="space-between" align="center">
               <Text fz="xs" tt="uppercase" c="dimmed" fw={600}>

@@ -33,8 +33,6 @@ export default function CharacterDetailsPage() {
   const character = characters?.find((c) => c.id === id);
   const className = character?.class?.toLowerCase() ?? '';
   const isSorcerer = className === 'sorcerer';
-  const isWizard = className === 'wizard';
-  const isCleric = className === 'cleric';
 
   const slotsQuery = useSpellSlots(id);
   const longRest = useLongRest(id);
