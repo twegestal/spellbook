@@ -15,12 +15,14 @@ type Props = {
   characterId: string;
   spells: Spell[];
   onOpenDetails: (spell: Spell) => void;
+  isSorcerer?: boolean;
 };
 
 export function PreparedSpellList({
   characterId,
   spells,
   onOpenDetails,
+  isSorcerer = false,
 }: Props) {
   const { data: slots } = useSpellSlots(characterId);
   const toggle = useToggleSpellSlot();
@@ -76,18 +78,21 @@ export function PreparedSpellList({
                 spawnDamageBlast(damage as DamageType);
               }
             },
-          }
+          },
         );
       },
     });
   };
 
-  const groups = spells.reduce((acc, spell) => {
-    const lvl = spell.level ?? 0;
-    if (!acc[lvl]) acc[lvl] = [];
-    acc[lvl].push(spell);
-    return acc;
-  }, {} as Record<number, Spell[]>);
+  const groups = spells.reduce(
+    (acc, spell) => {
+      const lvl = spell.level ?? 0;
+      if (!acc[lvl]) acc[lvl] = [];
+      acc[lvl].push(spell);
+      return acc;
+    },
+    {} as Record<number, Spell[]>,
+  );
 
   const sortedLevels = Object.keys(groups)
     .map(Number)
@@ -187,7 +192,7 @@ export function PreparedSpellList({
         gap="md"
         style={{ listStyle: 'none', padding: 0, margin: 0 }}
       >
-        {sortedLevels.map((lvl, _i) => (
+        {sortedLevels.map((lvl) => (
           <Stack key={lvl} gap="xs">
             <Group justify="space-between" align="center">
               <Text fz="xs" tt="uppercase" c="dimmed" fw={600}>
@@ -202,7 +207,9 @@ export function PreparedSpellList({
                 .map((spell) => (
                   <PreparedSpellListItem
                     key={spell.id}
+                    characterId={characterId}
                     spell={spell}
+                    isSorcerer={isSorcerer}
                     onOpenDetails={() => onOpenDetails(spell)}
                     onCast={() => handleCast(spell)}
                   />

@@ -92,7 +92,7 @@ export default function CharacterDetailsPage() {
 
   const preparedSet = useMemo(
     () => new Set((preparedSpells ?? []).map((s) => String(s.id))),
-    [preparedSpells]
+    [preparedSpells],
   );
 
   const anyLoading = loadingKnown || loadingPrepared;
@@ -144,6 +144,7 @@ export default function CharacterDetailsPage() {
                 <PreparedSpellList
                   characterId={id}
                   spells={sortedKnownSpells}
+                  isSorcerer={isSorcerer}
                   onOpenDetails={(spell) => openSpellModal(spell)}
                 />
               ) : (
