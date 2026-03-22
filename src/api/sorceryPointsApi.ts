@@ -11,4 +11,9 @@ export const sorceryPointsApi = (apiClient: typeof ky) => ({
     apiClient
       .post(`characters/${characterId}/sorcery-points/spend`, { json: body })
       .json<{ ok: boolean }>(),
+
+  recoverSorceryPoints: (characterId: string, body: { qty: number }) =>
+    apiClient
+      .post(`characters/${characterId}/sorcery-points/restore`, { json: body })
+      .json<{ ok: boolean }>(),
 });

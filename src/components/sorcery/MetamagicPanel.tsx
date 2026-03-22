@@ -13,11 +13,12 @@ import {
   Loader,
 } from '@mantine/core';
 import { useState } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Minus, Trash2 } from 'lucide-react';
 
 import {
   useSorceryPoints,
   useSpendSorceryPoints,
+  useRecoverSorceryPoints,
 } from '../../hooks/useSorceryPoints';
 import { useMetamagic } from '../../hooks/useMetamagic';
 import {
@@ -35,9 +36,10 @@ type Props = {
 export function MetamagicPanel({ characterId }: Props) {
   const sp = useSorceryPoints(characterId);
   const spend = useSpendSorceryPoints(characterId);
+  const recover = useRecoverSorceryPoints(characterId);
 
   const remaining = Math.max(0, Number(sp.data?.remaining ?? 0));
-  const maximum = Math.max(remaining, Number(sp.data?.maximum ?? 0));
+  const maximum = Math.max(0, Number(sp.data?.maximum ?? 0));
   const pct = maximum > 0 ? Math.min(100, (remaining / maximum) * 100) : 0;
 
   const { data: catalog, isLoading: catalogLoading } = useMetamagic();
@@ -49,7 +51,7 @@ export function MetamagicPanel({ characterId }: Props) {
 
   const { knownOptions, availableOptions } = mergeKnownWithCatalog(
     catalog,
-    knownRows
+    knownRows,
   );
 
   const [addOpen, setAddOpen] = useState(false);
@@ -60,12 +62,22 @@ export function MetamagicPanel({ characterId }: Props) {
     spend.mutate({ qty: amount });
   };
 
+  const handleSpendOne = () => {
+    if (remaining <= 0 || spend.isPending) return;
+    spend.mutate({ qty: 1 });
+  };
+
+  const handleRecoverOne = () => {
+    if (remaining >= maximum || recover.isPending) return;
+    recover.mutate({ qty: 1 });
+  };
+
   const handleAdd = (idx: string) => {
     addKnown.mutate(
       { idx },
       {
         onSuccess: () => setAddOpen(false),
-      }
+      },
     );
   };
 
@@ -75,7 +87,7 @@ export function MetamagicPanel({ characterId }: Props) {
       { idx },
       {
         onSettled: () => setRemovingIdx(null),
-      }
+      },
     );
   };
 
@@ -85,13 +97,40 @@ export function MetamagicPanel({ characterId }: Props) {
 
   return (
     <Stack gap="md">
-      {/* Sorcery points summary */}
       <Paper withBorder radius="md" p="md">
         <Group justify="space-between" mb="sm">
           <Text fw={600}>Sorcery points</Text>
-          <Badge variant={remaining === 0 ? 'outline' : 'light'} color="grape">
-            {sp.isLoading ? '—/—' : `${remaining}/${maximum}`}
-          </Badge>
+
+          <Group gap="xs" align="center">
+            <ActionIcon
+              variant="light"
+              color="red"
+              onClick={handleSpendOne}
+              disabled={sp.isLoading || remaining <= 0 || spend.isPending}
+              aria-label="Spend 1 sorcery point"
+            >
+              {spend.isPending ? <Loader size="xs" /> : <Minus size={16} />}
+            </ActionIcon>
+
+            <ActionIcon
+              variant="light"
+              color="grape"
+              onClick={handleRecoverOne}
+              disabled={
+                sp.isLoading || remaining >= maximum || recover.isPending
+              }
+              aria-label="Recover 1 sorcery point"
+            >
+              {recover.isPending ? <Loader size="xs" /> : <Plus size={16} />}
+            </ActionIcon>
+
+            <Badge
+              variant={remaining === 0 ? 'outline' : 'light'}
+              color="grape"
+            >
+              {sp.isLoading ? '—/—' : `${remaining}/${maximum}`}
+            </Badge>
+          </Group>
         </Group>
 
         <Progress
@@ -105,7 +144,6 @@ export function MetamagicPanel({ characterId }: Props) {
         </Text>
       </Paper>
 
-      {/* Metamagic list */}
       <Paper withBorder radius="md" p="md">
         <Group justify="space-between" mb="sm">
           <Text fw={600}>Metamagic</Text>
@@ -117,7 +155,6 @@ export function MetamagicPanel({ characterId }: Props) {
           </Text>
         ) : (
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-            {/* Known cards */}
             {knownOptions.map((m) => {
               const canAfford = remaining >= m.cost && !spend.isPending;
               const isRemovingThis = removingIdx === m.__idx;
@@ -175,7 +212,6 @@ export function MetamagicPanel({ characterId }: Props) {
               );
             })}
 
-            {/* Add new option card */}
             <Card
               withBorder
               radius="md"
