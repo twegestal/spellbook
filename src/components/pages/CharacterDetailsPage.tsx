@@ -18,12 +18,17 @@ import {
   useCharacterPreparedSpells,
   useCharacters,
 } from '../../hooks/useCharacters';
-import { useSpellSlots, useLongRest } from '../../hooks/useSpellSlots';
+import {
+  useSpellSlots,
+  useLongRest,
+  useShortRest,
+} from '../../hooks/useSpellSlots';
 import { openSpellModal } from '../overlays/openSpellModal';
 import { KnownSpellList } from '../spell/KnownSpellList';
 import { PreparedSpellList } from '../spell/PreparedSpellList';
 import { RestPanel } from '../spell/RestPanel';
 import { MetamagicPanel } from '../sorcery/MetamagicPanel';
+import { InvocationsPanel } from '../warlock/InvocationsPanel';
 
 export default function CharacterDetailsPage() {
   const { setLeft, setRight } = useHeader();
@@ -33,9 +38,11 @@ export default function CharacterDetailsPage() {
   const character = characters?.find((c) => c.id === id);
   const className = character?.class?.toLowerCase() ?? '';
   const isSorcerer = className === 'sorcerer';
+  const isWarlock = className === 'warlock';
 
   const slotsQuery = useSpellSlots(id);
   const longRest = useLongRest(id);
+  const shortRest = useShortRest(id);
 
   const [showRestOverlay, setShowRestOverlay] = useState(false);
 
@@ -73,6 +80,21 @@ export default function CharacterDetailsPage() {
       },
     });
   }, [longRest]);
+
+  const openShortRestConfirm = useCallback(() => {
+    openConfirmModal({
+      title: 'Take a short rest?',
+      children: <Text size="sm">This will restore your Pact Magic slots.</Text>,
+      labels: { confirm: 'Yes, short rest', cancel: 'Cancel' },
+      centered: true,
+      onConfirm: () => {
+        setShowRestOverlay(true);
+        shortRest.mutate(undefined, {
+          onError: () => setShowRestOverlay(false),
+        });
+      },
+    });
+  }, [shortRest]);
 
   const longRestClickable = !showRestOverlay && !longRest.isPending;
 
@@ -128,11 +150,11 @@ export default function CharacterDetailsPage() {
       <LoadingOverlay visible={showRestOverlay} zIndex={1000} />
       <Stack gap="md">
         <Tabs defaultValue="known" variant="outline" radius="md">
-          <Tabs.List mb={'lg'}>
+          <Tabs.List mb="lg">
             <Tabs.Tab value="known">Spells</Tabs.Tab>
-            {isSorcerer ? (
-              <Tabs.Tab value="sorcery">Metamagic</Tabs.Tab>
-            ) : (
+            {isSorcerer && <Tabs.Tab value="sorcery">Metamagic</Tabs.Tab>}
+            {isWarlock && <Tabs.Tab value="invocations">Invocations</Tabs.Tab>}
+            {!isSorcerer && !isWarlock && (
               <Tabs.Tab value="prepared">Prepared</Tabs.Tab>
             )}
             <Tabs.Tab value="rest">Remaining slots</Tabs.Tab>
@@ -140,7 +162,7 @@ export default function CharacterDetailsPage() {
 
           <Tabs.Panel value="known">
             {sortedKnownSpells.length > 0 ? (
-              isSorcerer ? (
+              isSorcerer || isWarlock ? (
                 <PreparedSpellList
                   characterId={id}
                   spells={sortedKnownSpells}
@@ -157,12 +179,11 @@ export default function CharacterDetailsPage() {
               )
             ) : (
               <Text c="dimmed">
-                This character doesn’t know any spells yet.
+                This character doesn't know any spells yet.
               </Text>
             )}
           </Tabs.Panel>
-
-          {!isSorcerer && (
+          {!isSorcerer && !isWarlock && (
             <Tabs.Panel value="prepared">
               {preparedSpells && preparedSpells.length > 0 ? (
                 <PreparedSpellList
@@ -175,18 +196,22 @@ export default function CharacterDetailsPage() {
               )}
             </Tabs.Panel>
           )}
-
           {isSorcerer && (
             <Tabs.Panel value="sorcery">
               <MetamagicPanel characterId={id} />
             </Tabs.Panel>
           )}
-
+          {isWarlock && (
+            <Tabs.Panel value="invocations">
+              <InvocationsPanel characterId={id} />
+            </Tabs.Panel>
+          )}
           <Tabs.Panel value="rest">
             <RestPanel
               longRestClickable={longRestClickable}
               onLongRest={openLongRestConfirm}
-              onShortRest={() => {}}
+              onShortRest={isWarlock ? openShortRestConfirm : undefined}
+              shortRestClickable={isWarlock && !shortRest.isPending}
               slots={slotsQuery.data}
               slotsLoading={slotsQuery.isLoading || slotsQuery.isFetching}
             />

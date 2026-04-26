@@ -114,7 +114,7 @@ export function SpellBuilderDrawer({
     <Drawer
       opened={opened}
       onClose={onClose}
-      title={isEditing ? `Edit — ${editSpell.name}` : 'New homebrew spell'}
+      title={isEditing ? `Edit — ${editSpell.name}` : 'Create spell'}
       size="100%"
       position="bottom"
     >

@@ -59,3 +59,16 @@ export function useLongRest(characterId: string | undefined) {
       : [],
   });
 }
+
+export function useShortRest(characterId: string | undefined) {
+  const shortRestApi = useApi('shortRest');
+
+  return useAuthedMutation<{ ok: boolean }, Error, void>({
+    mutationKey: ['shortRest', characterId],
+    mutationFn: async () => {
+      if (!characterId) throw new Error('Missing characterId');
+      return shortRestApi(characterId);
+    },
+    invalidateKeys: characterId ? [['slots', characterId]] : [],
+  });
+}

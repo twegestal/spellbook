@@ -71,9 +71,6 @@ export function SpellBuilderForm({
 
           <Divider />
 
-          <Text fw={600} fz="sm">
-            Classes
-          </Text>
           <SpellClassesSection form={form} spellClasses={spellClasses} />
 
           <Divider />

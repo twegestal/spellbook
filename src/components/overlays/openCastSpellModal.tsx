@@ -14,7 +14,7 @@ function buildCastOptions(slots: any, spellLevel: number): CastOption[] {
 
   if (slots.kind === 'pact') {
     const { slotLevel, remaining, maximum } = slots;
-    if (slotLevel >= spellLevel && remaining > 0) {
+    if (remaining > 0) {
       const spent = maximum - remaining;
       return [{ level: slotLevel, remaining, maximum, nextIndex: spent + 1 }];
     }
@@ -27,7 +27,7 @@ function buildCastOptions(slots: any, spellLevel: number): CastOption[] {
       (slots.levels ?? []).map((r: any) => [
         r.slotLevel,
         { maximum: r.maximum, remaining: r.remaining },
-      ])
+      ]),
     );
 
   const levels = Object.keys(byLevel)

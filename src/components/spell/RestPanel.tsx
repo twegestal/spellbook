@@ -22,6 +22,7 @@ type Props = {
   longRestClickable: boolean;
   onLongRest: () => void;
   onShortRest?: () => void;
+  shortRestClickable?: boolean;
   slots?: SpellSlots;
   slotsLoading?: boolean;
 };
@@ -47,7 +48,6 @@ function toDisplayLevels(slots?: SpellSlots): DisplayLevel[] {
       });
   }
 
-  // pact
   const pact = slots as SpellSlotsPact;
   return [
     {
@@ -63,6 +63,7 @@ export function RestPanel({
   longRestClickable,
   onLongRest,
   onShortRest,
+  shortRestClickable,
   slots,
   slotsLoading = false,
 }: Props) {
@@ -91,20 +92,27 @@ export function RestPanel({
           </Group>
         </Card>
 
-        <Card
-          shadow="sm"
-          radius="md"
-          withBorder
-          className={classes.tile}
-          onClick={() => onShortRest?.()}
-          tabIndex={0}
-          onKeyDown={(e) => e.key === 'Enter' && onShortRest?.()}
-        >
-          <Group align="center" gap="sm" wrap="nowrap">
-            <FlameKindling size={22} color="var(--mantine-color-red-5)" />
-            <Text fw={500}>Short rest</Text>
-          </Group>
-        </Card>
+        {onShortRest !== undefined && (
+          <Card
+            shadow="sm"
+            radius="md"
+            withBorder
+            className={`${classes.tile} ${
+              !shortRestClickable ? classes.tileDisabled : ''
+            }`}
+            onClick={() => shortRestClickable && onShortRest()}
+            aria-disabled={!shortRestClickable}
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && shortRestClickable) onShortRest();
+            }}
+          >
+            <Group align="center" gap="sm" wrap="nowrap">
+              <FlameKindling size={22} color="var(--mantine-color-red-5)" />
+              <Text fw={500}>Short rest</Text>
+            </Group>
+          </Card>
+        )}
       </Group>
 
       <Paper withBorder radius="md" p="md">

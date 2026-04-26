@@ -5,6 +5,7 @@ import { metaApi } from './metaApi';
 import { slotsApi } from './slotApi';
 import { metamagicApi } from './metamagicApi';
 import { sorceryPointsApi } from './sorceryPointsApi';
+import { invocationsApi } from './invocationsApi';
 
 export const api = (apiClient: typeof ky) =>
   Object.freeze({
@@ -14,4 +15,5 @@ export const api = (apiClient: typeof ky) =>
     ...slotsApi(apiClient),
     ...metamagicApi(apiClient),
     ...sorceryPointsApi(apiClient),
+    ...invocationsApi(apiClient),
   });
