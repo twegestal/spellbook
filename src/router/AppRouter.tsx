@@ -15,6 +15,7 @@ import SettingsPage from '../components/pages/SettingsPage';
 import CharactersPage from '../components/pages/CharactersPage';
 import CreateCharacterPage from '../components/pages/CreateCharacterPage';
 import CharacterDetailsPage from '../components/pages/CharacterDetailsPage';
+import HomebrewPage from '../components/pages/HomebrewPage';
 
 function RouterLevelProviders() {
   return (
@@ -44,6 +45,7 @@ const router = createBrowserRouter([
               { path: '/characters/new', element: <CreateCharacterPage /> },
               { path: '/characters/:id', element: <CharacterDetailsPage /> },
               { path: '/settings', element: <SettingsPage /> },
+              { path: '/spells/homebrew', element: <HomebrewPage /> },
             ],
           },
         ],

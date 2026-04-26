@@ -23,3 +23,30 @@ export const useClasses = () => {
     staleTime: oneDay,
   });
 };
+
+export const useSchools = () => {
+  const getSchools = useApi('getSchools');
+  return useAuthedQuery({
+    queryKey: ['meta', 'schools'],
+    queryFn: getSchools,
+    staleTime: Infinity,
+  });
+};
+
+export const useDamageTypes = () => {
+  const getDamageTypes = useApi('getDamageTypes');
+  return useAuthedQuery({
+    queryKey: ['meta', 'damage-types'],
+    queryFn: getDamageTypes,
+    staleTime: Infinity,
+  });
+};
+
+export const useSpellClasses = () => {
+  const getSpellClasses = useApi('getSpellClasses');
+  return useAuthedQuery({
+    queryKey: ['meta', 'spell-classes'],
+    queryFn: getSpellClasses,
+    staleTime: Infinity,
+  });
+};
