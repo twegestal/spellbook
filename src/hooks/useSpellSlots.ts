@@ -55,6 +55,7 @@ export function useLongRest(characterId: string | undefined) {
       ? [
           ['slots', characterId],
           ['sorceryPoints', characterId],
+          ['resources', characterId],
         ]
       : [],
   });
@@ -69,6 +70,11 @@ export function useShortRest(characterId: string | undefined) {
       if (!characterId) throw new Error('Missing characterId');
       return shortRestApi(characterId);
     },
-    invalidateKeys: characterId ? [['slots', characterId]] : [],
+    invalidateKeys: characterId
+      ? [
+          ['slots', characterId],
+          ['resources', characterId],
+        ]
+      : [],
   });
 }

@@ -29,6 +29,9 @@ import { PreparedSpellList } from '../spell/PreparedSpellList';
 import { RestPanel } from '../spell/RestPanel';
 import { MetamagicPanel } from '../sorcery/MetamagicPanel';
 import { InvocationsPanel } from '../warlock/InvocationsPanel';
+import { PaladinPanel } from '../paladin/PaladinPanel';
+import { BardPanel } from '../bard/BardPanel';
+import { DruidPanel } from '../druid/DruidPanel';
 
 export default function CharacterDetailsPage() {
   const { setLeft, setRight } = useHeader();
@@ -37,8 +40,21 @@ export default function CharacterDetailsPage() {
 
   const character = characters?.find((c) => c.id === id);
   const className = character?.class?.toLowerCase() ?? '';
+  const level = character?.level ?? 1;
+
   const isSorcerer = className === 'sorcerer';
   const isWarlock = className === 'warlock';
+  const isPaladin = className === 'paladin';
+  const isBard = className === 'bard';
+  const isDruid = className === 'druid';
+  const isRanger = className === 'ranger';
+
+  const isKnownSpellsClass = isSorcerer || isWarlock || isBard || isRanger;
+
+  const bardHasShortRest = isBard && level >= 5;
+  const paladinHasShortRest = isPaladin && level >= 6;
+  const hasShortRest =
+    isWarlock || paladinHasShortRest || bardHasShortRest || isDruid;
 
   const slotsQuery = useSpellSlots(id);
   const longRest = useLongRest(id);
@@ -84,7 +100,13 @@ export default function CharacterDetailsPage() {
   const openShortRestConfirm = useCallback(() => {
     openConfirmModal({
       title: 'Take a short rest?',
-      children: <Text size="sm">This will restore your Pact Magic slots.</Text>,
+      children: (
+        <Text size="sm">
+          {isWarlock
+            ? 'This will restore your Pact Magic slots.'
+            : 'This will restore your short rest resources.'}
+        </Text>
+      ),
       labels: { confirm: 'Yes, short rest', cancel: 'Cancel' },
       centered: true,
       onConfirm: () => {
@@ -94,7 +116,7 @@ export default function CharacterDetailsPage() {
         });
       },
     });
-  }, [shortRest]);
+  }, [shortRest, isWarlock]);
 
   const longRestClickable = !showRestOverlay && !longRest.isPending;
 
@@ -154,7 +176,10 @@ export default function CharacterDetailsPage() {
             <Tabs.Tab value="known">Spells</Tabs.Tab>
             {isSorcerer && <Tabs.Tab value="sorcery">Metamagic</Tabs.Tab>}
             {isWarlock && <Tabs.Tab value="invocations">Invocations</Tabs.Tab>}
-            {!isSorcerer && !isWarlock && (
+            {isPaladin && <Tabs.Tab value="paladin">Paladin</Tabs.Tab>}
+            {isBard && <Tabs.Tab value="bard">Bardic Inspiration</Tabs.Tab>}
+            {isDruid && <Tabs.Tab value="druid">Wild Shape</Tabs.Tab>}
+            {!isKnownSpellsClass && (
               <Tabs.Tab value="prepared">Prepared</Tabs.Tab>
             )}
             <Tabs.Tab value="rest">Remaining slots</Tabs.Tab>
@@ -162,7 +187,7 @@ export default function CharacterDetailsPage() {
 
           <Tabs.Panel value="known">
             {sortedKnownSpells.length > 0 ? (
-              isSorcerer || isWarlock ? (
+              isKnownSpellsClass ? (
                 <PreparedSpellList
                   characterId={id}
                   spells={sortedKnownSpells}
@@ -183,7 +208,8 @@ export default function CharacterDetailsPage() {
               </Text>
             )}
           </Tabs.Panel>
-          {!isSorcerer && !isWarlock && (
+
+          {!isKnownSpellsClass && (
             <Tabs.Panel value="prepared">
               {preparedSpells && preparedSpells.length > 0 ? (
                 <PreparedSpellList
@@ -196,22 +222,43 @@ export default function CharacterDetailsPage() {
               )}
             </Tabs.Panel>
           )}
+
           {isSorcerer && (
             <Tabs.Panel value="sorcery">
               <MetamagicPanel characterId={id} />
             </Tabs.Panel>
           )}
+
           {isWarlock && (
             <Tabs.Panel value="invocations">
               <InvocationsPanel characterId={id} />
             </Tabs.Panel>
           )}
+
+          {isPaladin && (
+            <Tabs.Panel value="paladin">
+              <PaladinPanel characterId={id} characterLevel={level} />
+            </Tabs.Panel>
+          )}
+
+          {isBard && (
+            <Tabs.Panel value="bard">
+              <BardPanel characterId={id} characterLevel={level} />
+            </Tabs.Panel>
+          )}
+
+          {isDruid && (
+            <Tabs.Panel value="druid">
+              <DruidPanel characterId={id} characterLevel={level} />
+            </Tabs.Panel>
+          )}
+
           <Tabs.Panel value="rest">
             <RestPanel
               longRestClickable={longRestClickable}
               onLongRest={openLongRestConfirm}
-              onShortRest={isWarlock ? openShortRestConfirm : undefined}
-              shortRestClickable={isWarlock && !shortRest.isPending}
+              onShortRest={hasShortRest ? openShortRestConfirm : undefined}
+              shortRestClickable={hasShortRest && !shortRest.isPending}
               slots={slotsQuery.data}
               slotsLoading={slotsQuery.isLoading || slotsQuery.isFetching}
             />
