@@ -39,20 +39,33 @@ export default function CharacterDetailsPage() {
   const { data: characters } = useCharacters();
 
   const character = characters?.find((c) => c.id === id);
-  const className = character?.class?.toLowerCase() ?? '';
+  const characterClasses = character?.classes ?? [];
   const level = character?.level ?? 1;
 
-  const isSorcerer = className === 'sorcerer';
-  const isWarlock = className === 'warlock';
-  const isPaladin = className === 'paladin';
-  const isBard = className === 'bard';
-  const isDruid = className === 'druid';
-  const isRanger = className === 'ranger';
+  const hasClass = (name: string) =>
+    characterClasses.some((c) => c.name.toLowerCase() === name);
+
+  const isSorcerer = hasClass('sorcerer');
+  const isWarlock = hasClass('warlock');
+  const isPaladin = hasClass('paladin');
+  const isBard = hasClass('bard');
+  const isDruid = hasClass('druid');
+  const isRanger = hasClass('ranger');
+
+  const paladinLevel =
+    characterClasses.find((c) => c.name.toLowerCase() === 'paladin')?.level ??
+    level;
+  const bardLevel =
+    characterClasses.find((c) => c.name.toLowerCase() === 'bard')?.level ??
+    level;
+  const druidLevel =
+    characterClasses.find((c) => c.name.toLowerCase() === 'druid')?.level ??
+    level;
 
   const isKnownSpellsClass = isSorcerer || isWarlock || isBard || isRanger;
 
-  const bardHasShortRest = isBard && level >= 5;
-  const paladinHasShortRest = isPaladin && level >= 6;
+  const bardHasShortRest = isBard && bardLevel >= 5;
+  const paladinHasShortRest = isPaladin && paladinLevel >= 6;
   const hasShortRest =
     isWarlock || paladinHasShortRest || bardHasShortRest || isDruid;
 
@@ -237,19 +250,19 @@ export default function CharacterDetailsPage() {
 
           {isPaladin && (
             <Tabs.Panel value="paladin">
-              <PaladinPanel characterId={id} characterLevel={level} />
+              <PaladinPanel characterId={id} characterLevel={paladinLevel} />
             </Tabs.Panel>
           )}
 
           {isBard && (
             <Tabs.Panel value="bard">
-              <BardPanel characterId={id} characterLevel={level} />
+              <BardPanel characterId={id} characterLevel={bardLevel} />
             </Tabs.Panel>
           )}
 
           {isDruid && (
             <Tabs.Panel value="druid">
-              <DruidPanel characterId={id} characterLevel={level} />
+              <DruidPanel characterId={id} characterLevel={druidLevel} />
             </Tabs.Panel>
           )}
 

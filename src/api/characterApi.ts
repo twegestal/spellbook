@@ -4,6 +4,7 @@ import ky from 'ky';
 
 export const characterApi = (api: typeof ky) => ({
   listCharacters: () => api.get('characters').json<CharacterListResponse>(),
+
   createCharacter: (body: {
     name: string;
     race: string;
@@ -30,6 +31,7 @@ export const characterApi = (api: typeof ky) => ({
     api
       .get(`characters/${characterId}/prepared-spells`)
       .json<SpellListResponse>(),
+
   addPreparedSpell: (body: { characterId: string; spellId: string }) =>
     api
       .post(`characters/${body.characterId}/prepared-spells`, {
@@ -45,5 +47,29 @@ export const characterApi = (api: typeof ky) => ({
   updateCharacterLevel: (characterId: string, level: number) =>
     api
       .patch(`characters/${characterId}/level`, { json: { level } })
+      .json<Character>(),
+
+  addCharacterClass: (
+    characterId: string,
+    body: { class: string; level: number },
+  ) =>
+    api
+      .post(`characters/${characterId}/classes`, { json: body })
+      .json<Character>(),
+
+  updateCharacterClassLevel: (
+    characterId: string,
+    classId: number,
+    level: number,
+  ) =>
+    api
+      .patch(`characters/${characterId}/classes/${classId}`, {
+        json: { level },
+      })
+      .json<Character>(),
+
+  removeCharacterClass: (characterId: string, classId: number) =>
+    api
+      .delete(`characters/${characterId}/classes/${classId}`)
       .json<Character>(),
 });

@@ -15,7 +15,20 @@ export type SpellSlotsPact = {
   maximum: number;
 };
 
-export type SpellSlots = SpellSlotsPrepared | SpellSlotsPact;
+export type SpellSlotsMulticlass = {
+  kind: 'multiclass';
+  pact: {
+    slotLevel: number;
+    remaining: number;
+    maximum: number;
+  };
+  byLevel: Record<number, { remaining: number; maximum: number }>;
+};
+
+export type SpellSlots =
+  | SpellSlotsPrepared
+  | SpellSlotsPact
+  | SpellSlotsMulticlass;
 
 export function useSpellSlots(characterId: string | undefined) {
   const getSpellSlots = useApi('getSpellSlots');
@@ -32,6 +45,20 @@ export function useSpellSlots(characterId: string | undefined) {
           maximum: res.maximum,
         } as SpellSlotsPact;
       }
+
+      if (res.type === 'multiclass') {
+        const byLevel: Record<number, { remaining: number; maximum: number }> =
+          {};
+        (res.levels as PreparedLevel[]).forEach((l) => {
+          byLevel[l.slotLevel] = { remaining: l.remaining, maximum: l.maximum };
+        });
+        return {
+          kind: 'multiclass',
+          pact: res.pact,
+          byLevel,
+        } as SpellSlotsMulticlass;
+      }
+
       const byLevel: Record<number, { remaining: number; maximum: number }> =
         {};
       (res.levels as PreparedLevel[]).forEach((l) => {

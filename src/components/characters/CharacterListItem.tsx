@@ -1,6 +1,9 @@
 import { Card, Badge, Group, Stack, Text, Button } from '@mantine/core';
 import type { Character } from '../../types/character';
-import { useUpdateCharacterLevel } from '../../hooks/useCharacters';
+import {
+  useUpdateCharacterClassLevel,
+  useAddCharacterClass,
+} from '../../hooks/useCharacters';
 import { openLevelUpModal } from '../overlays/openLevelUpModal';
 import { notifications } from '@mantine/notifications';
 
@@ -10,22 +13,26 @@ type Props = {
 };
 
 export function CharacterListItem({ character, onClick }: Props) {
-  const updateLevel = useUpdateCharacterLevel();
+  const updateClassLevel = useUpdateCharacterClassLevel();
+  const addCharacterClass = useAddCharacterClass();
+
+  const classDisplay =
+    character.classes.length > 0
+      ? character.classes.map((c) => `${c.name} ${c.level}`).join(' / ')
+      : character.class;
 
   const levelUp = () => {
     openLevelUpModal({
       character,
-      onConfirm: (newLevel) => {
-        if (newLevel === character.level) return;
-
-        updateLevel.mutate(
-          { characterId: character.id, level: newLevel },
+      onLevelUp: ({ classId, level }) => {
+        updateClassLevel.mutate(
+          { characterId: character.id, classId, level },
           {
             onSuccess: (c) => {
               notifications.show({
                 color: 'teal',
                 title: 'Level updated',
-                message: `${c.name} is now level ${c.level}.`,
+                message: `${c.name} updated successfully.`,
               });
             },
             onError: (err: any) => {
@@ -35,7 +42,28 @@ export function CharacterListItem({ character, onClick }: Props) {
                 message: err?.message ?? 'Please try again.',
               });
             },
-          }
+          },
+        );
+      },
+      onAddClass: ({ className, level }) => {
+        addCharacterClass.mutate(
+          { characterId: character.id, class: className, level },
+          {
+            onSuccess: (c) => {
+              notifications.show({
+                color: 'teal',
+                title: 'Class added',
+                message: `${className} added to ${c.name}.`,
+              });
+            },
+            onError: (err: any) => {
+              notifications.show({
+                color: 'red',
+                title: 'Failed to add class',
+                message: err?.message ?? 'Please try again.',
+              });
+            },
+          },
         );
       },
     });
@@ -56,7 +84,7 @@ export function CharacterListItem({ character, onClick }: Props) {
             {character.name}
           </Text>
           <Text fz="sm" c="dimmed" truncate>
-            {[character.class, character.race].filter(Boolean).join(' • ')}
+            {[classDisplay, character.race].filter(Boolean).join(' • ')}
           </Text>
         </Stack>
         <Stack>
@@ -69,7 +97,7 @@ export function CharacterListItem({ character, onClick }: Props) {
               e.stopPropagation();
               levelUp();
             }}
-            loading={updateLevel.isPending}
+            loading={updateClassLevel.isPending || addCharacterClass.isPending}
           >
             Level up
           </Button>

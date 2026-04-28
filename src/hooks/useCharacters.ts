@@ -139,7 +139,7 @@ export const useRemovePreparedSpell = () => {
       const prev = qc.getQueryData<Spell[]>(key) ?? [];
       qc.setQueryData<Spell[]>(
         key,
-        prev.filter((s) => String(s.id) !== String(spellId))
+        prev.filter((s) => String(s.id) !== String(spellId)),
       );
 
       return { prev };
@@ -180,7 +180,7 @@ export const useUpdateCharacterLevel = () => {
       qc.setQueryData(listKey, (old: unknown) => {
         if (Array.isArray(old)) {
           return (old as Character[]).map((c) =>
-            c.id === characterId ? { ...c, level } : c
+            c.id === characterId ? { ...c, level } : c,
           );
         }
         return old;
@@ -212,5 +212,44 @@ export const useUpdateCharacterLevel = () => {
       qc.invalidateQueries({ queryKey: ['sorceryPoints'] });
       qc.invalidateQueries({ queryKey: ['slots'] });
     },
+  });
+};
+
+export const useAddCharacterClass = () => {
+  const addCharacterClass = useApi('addCharacterClass');
+  return useAuthedMutation<
+    Character,
+    unknown,
+    { characterId: string; class: string; level: number }
+  >({
+    mutationFn: ({ characterId, ...body }) =>
+      addCharacterClass(characterId, body),
+    invalidateKeys: [['characters']],
+  });
+};
+
+export const useUpdateCharacterClassLevel = () => {
+  const updateCharacterClassLevel = useApi('updateCharacterClassLevel');
+  return useAuthedMutation<
+    Character,
+    unknown,
+    { characterId: string; classId: number; level: number }
+  >({
+    mutationFn: ({ characterId, classId, level }) =>
+      updateCharacterClassLevel(characterId, classId, level),
+    invalidateKeys: [['characters']],
+  });
+};
+
+export const useRemoveCharacterClass = () => {
+  const removeCharacterClass = useApi('removeCharacterClass');
+  return useAuthedMutation<
+    Character,
+    unknown,
+    { characterId: string; classId: number }
+  >({
+    mutationFn: ({ characterId, classId }) =>
+      removeCharacterClass(characterId, classId),
+    invalidateKeys: [['characters']],
   });
 };

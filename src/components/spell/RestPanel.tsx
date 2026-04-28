@@ -37,26 +37,43 @@ type DisplayLevel = {
 function toDisplayLevels(slots?: SpellSlots): DisplayLevel[] {
   if (!slots) return [];
 
-  if (slots.kind === 'prepared') {
-    const prepared = slots as SpellSlotsPrepared;
-    return Object.keys(prepared.byLevel)
-      .map((k) => Number(k))
-      .sort((a, b) => a - b)
-      .map((lvl) => {
-        const { remaining, maximum } = prepared.byLevel[lvl]!;
-        return { label: `Lv ${lvl}`, remaining, maximum, order: lvl };
-      });
+  if (slots.kind === 'pact') {
+    return [
+      {
+        label: `Pact (Lv ${slots.slotLevel})`,
+        remaining: slots.remaining,
+        maximum: slots.maximum,
+        order: slots.slotLevel,
+      },
+    ];
   }
 
-  const pact = slots as SpellSlotsPact;
-  return [
-    {
-      label: `Lv ${pact.slotLevel}`,
-      remaining: pact.remaining,
-      maximum: pact.maximum,
-      order: pact.slotLevel,
-    },
-  ];
+  if (slots.kind === 'multiclass') {
+    const pactLevel: DisplayLevel = {
+      label: `Pact (Lv ${slots.pact.slotLevel})`,
+      remaining: slots.pact.remaining,
+      maximum: slots.pact.maximum,
+      order: slots.pact.slotLevel,
+    };
+
+    const regularLevels = Object.keys(slots.byLevel)
+      .map(Number)
+      .sort((a, b) => a - b)
+      .map((lvl) => {
+        const { remaining, maximum } = slots.byLevel[lvl]!;
+        return { label: `Lv ${lvl}`, remaining, maximum, order: lvl };
+      });
+
+    return [pactLevel, ...regularLevels];
+  }
+
+  return Object.keys(slots.byLevel)
+    .map(Number)
+    .sort((a, b) => a - b)
+    .map((lvl) => {
+      const { remaining, maximum } = slots.byLevel[lvl]!;
+      return { label: `Lv ${lvl}`, remaining, maximum, order: lvl };
+    });
 }
 
 export function RestPanel({

@@ -1,11 +1,22 @@
+export type CharacterClass = {
+  id: number;
+  name: string;
+  level: number;
+};
+
 export type Character = {
   id: string;
   name: string;
   race: string;
   class: string;
+  classes: CharacterClass[];
   level: number;
   created_at: string;
   updated_at: string;
+};
+
+export type CharacterListResponse = {
+  results: Character[];
 };
 
 export type CreateCharacterInput = {
@@ -14,5 +25,3 @@ export type CreateCharacterInput = {
   class: string;
   level: number;
 };
-
-export type CharacterListResponse = { results: Character[] };

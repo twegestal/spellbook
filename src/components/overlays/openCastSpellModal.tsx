@@ -21,7 +21,45 @@ function buildCastOptions(slots: any, spellLevel: number): CastOption[] {
     return [];
   }
 
-  const byLevel: Record<number, { maximum: number; remaining: number }> =
+  if (slots.kind === 'multiclass') {
+    const options: CastOption[] = [];
+
+    if (slots.pact.remaining > 0) {
+      const { slotLevel, remaining, maximum } = slots.pact;
+      const spent = maximum - remaining;
+      options.push({
+        level: slotLevel,
+        remaining,
+        maximum,
+        nextIndex: spent + 1,
+      });
+    }
+
+    // Vanliga slots — bara om spell level matchar
+    const byLevel = slots.byLevel ?? {};
+    const levels = Object.keys(byLevel)
+      .map(Number)
+      .filter((lvl) => lvl >= spellLevel)
+      .sort((a, b) => a - b);
+
+    for (const lvl of levels) {
+      const row = byLevel[lvl];
+      if (row?.remaining > 0) {
+        const spent = row.maximum - row.remaining;
+        options.push({
+          level: lvl,
+          remaining: row.remaining,
+          maximum: row.maximum,
+          nextIndex: spent + 1,
+        });
+      }
+    }
+
+    return options;
+  }
+
+  // prepared
+  const byLevel =
     slots.byLevel ??
     Object.fromEntries(
       (slots.levels ?? []).map((r: any) => [
