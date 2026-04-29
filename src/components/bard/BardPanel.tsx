@@ -136,7 +136,7 @@ export function BardPanel({ characterId, characterLevel }: Props) {
           Grant a creature one Bardic Inspiration die ({die}) to add to one
           ability check, attack roll, or saving throw.{' '}
           {characterLevel >= 5
-            ? 'Resets on short or long rest (Font of Inspiration).'
+            ? 'Resets on short or long rest.'
             : 'Resets on long rest.'}
         </Text>
 

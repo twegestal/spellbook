@@ -63,7 +63,7 @@ export default function HomebrewPage() {
     <>
       <Stack gap="lg">
         <Group justify="space-between" align="center">
-          <Title order={3}>My homebrew spells</Title>
+          <Title order={3}>Homebrew spells</Title>
           <Button
             leftSection={<Plus size={16} />}
             onClick={() => setDrawerOpen(true)}

@@ -72,4 +72,12 @@ export const characterApi = (api: typeof ky) => ({
     api
       .delete(`characters/${characterId}/classes/${classId}`)
       .json<Character>(),
+
+  listAllCharacters: () =>
+    api.get('characters/all').json<CharacterListResponse>(),
+
+  retireCharacter: (characterId: string) =>
+    api.patch(`characters/${characterId}/retire`).json<Character>(),
+  restoreCharacter: (characterId: string) =>
+    api.patch(`characters/${characterId}/restore`).json<Character>(),
 });

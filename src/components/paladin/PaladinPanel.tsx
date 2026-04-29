@@ -22,6 +22,7 @@ import { notifications } from '@mantine/notifications';
 import { useToggleSpellSlot } from '../../hooks/useToggleSpellSlot';
 import { useEffect, useState } from 'react';
 import { SpendResourceModal } from '../shared/SpendResourceModal';
+import { spawnDamageBlast } from '../animations/spawnDamageBlast';
 
 type Props = {
   characterId: string;
@@ -104,12 +105,7 @@ export function PaladinPanel({ characterId, characterLevel }: Props) {
               });
             },
             onSuccess: () => {
-              const extraDice = slotLevel + 1;
-              notifications.show({
-                color: 'yellow',
-                title: 'Divine Smite!',
-                message: `Roll ${extraDice}d8 radiant damage (+ 1d8 if undead or fiend)`,
-              });
+              spawnDamageBlast('radiant');
             },
           },
         );

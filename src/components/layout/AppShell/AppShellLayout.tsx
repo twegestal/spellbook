@@ -3,6 +3,8 @@ import { AppShell, Burger, Group, Title, Box } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Outlet } from 'react-router-dom';
 import { NavBar } from './Navbar';
+import { DiceFab } from '../../dice/DiceFab';
+import { usePreferences } from '../../../hooks/usePreferences';
 
 type HeaderAPI = {
   setLeft: (node: React.ReactNode) => void;
@@ -18,10 +20,11 @@ export function useHeader() {
 export function AppShellLayout() {
   const [opened, { toggle, close }] = useDisclosure();
   const [left, setLeft] = useState<React.ReactNode>(
-    <Title order={4}>Spellbook</Title>
+    <Title order={4}>Spellbook</Title>,
   );
   const [right, setRight] = useState<React.ReactNode>(null);
   const headerAPI = useMemo(() => ({ setLeft, setRight }), []);
+  const { prefs } = usePreferences();
 
   return (
     <HeaderCtx.Provider value={headerAPI}>

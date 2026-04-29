@@ -253,3 +253,28 @@ export const useRemoveCharacterClass = () => {
     invalidateKeys: [['characters']],
   });
 };
+
+export const useAllCharacters = () => {
+  const listAllCharacters = useApi('listAllCharacters');
+  return useAuthedQuery<CharacterListResponse, unknown, Character[]>({
+    queryKey: ['characters', 'all'],
+    queryFn: listAllCharacters,
+    select: (data) => data.results,
+  });
+};
+
+export const useRetireCharacter = () => {
+  const retireCharacter = useApi('retireCharacter');
+  return useAuthedMutation<Character, unknown, { characterId: string }>({
+    mutationFn: ({ characterId }) => retireCharacter(characterId),
+    invalidateKeys: [['characters'], ['characters', 'all']],
+  });
+};
+
+export const useRestoreCharacter = () => {
+  const restoreCharacter = useApi('restoreCharacter');
+  return useAuthedMutation<Character, unknown, { characterId: string }>({
+    mutationFn: ({ characterId }) => restoreCharacter(characterId),
+    invalidateKeys: [['characters'], ['characters', 'all']],
+  });
+};
