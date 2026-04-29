@@ -3,7 +3,6 @@ import { Card, Stack, Text, Title, Divider, Box } from '@mantine/core';
 import { useHeader } from '../layout/AppShell/AppShellLayout';
 import { ColorSchemeToggle } from '../layout/ColorSchemeToggle';
 import { CharacterManager } from '../settings/CharacterManager';
-import { DiceRollerToggle } from '../settings/DiceRollerToggle';
 
 export default function SettingsPage() {
   const { setLeft, setRight } = useHeader();

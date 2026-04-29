@@ -3,8 +3,6 @@ import { AppShell, Burger, Group, Title, Box } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Outlet } from 'react-router-dom';
 import { NavBar } from './Navbar';
-import { DiceFab } from '../../dice/DiceFab';
-import { usePreferences } from '../../../hooks/usePreferences';
 
 type HeaderAPI = {
   setLeft: (node: React.ReactNode) => void;
@@ -24,7 +22,6 @@ export function AppShellLayout() {
   );
   const [right, setRight] = useState<React.ReactNode>(null);
   const headerAPI = useMemo(() => ({ setLeft, setRight }), []);
-  const { prefs } = usePreferences();
 
   return (
     <HeaderCtx.Provider value={headerAPI}>
