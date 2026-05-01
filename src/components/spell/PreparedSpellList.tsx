@@ -54,15 +54,16 @@ export function PreparedSpellList({
     openCastSpellModal({
       spell,
       slots,
-      onPick: (slotLevel, slotIndex) => {
+      onPick: (slotLevel, slotIndex, isPact) => {
         if (slotLevel === 0) {
           const damage = spell.damage_type_name?.toLowerCase?.();
           if (damage) spawnDamageBlast(damage as DamageType);
           return;
         }
+
         if (isBusy) return;
         toggle.mutate(
-          { characterId, slotLevel, slotIndex },
+          { characterId, slotLevel, slotIndex, isPact },
           {
             onError: (err: any) => {
               notifications.show({
@@ -190,7 +191,12 @@ export function PreparedSpellList({
         spent,
         onToggle: (slotIndex: number) => {
           if (isBusy) return;
-          toggle.mutate({ characterId, slotLevel: zoom.lvl, slotIndex });
+          toggle.mutate({
+            characterId,
+            slotLevel: zoom.lvl,
+            slotIndex,
+            isPact: true,
+          });
         },
       };
     }
@@ -205,7 +211,12 @@ export function PreparedSpellList({
           spent,
           onToggle: (slotIndex: number) => {
             if (isBusy) return;
-            toggle.mutate({ characterId, slotLevel: zoom.lvl, slotIndex });
+            toggle.mutate({
+              characterId,
+              slotLevel: zoom.lvl,
+              slotIndex,
+              isPact: true,
+            });
           },
         };
       }
@@ -219,7 +230,12 @@ export function PreparedSpellList({
         spent,
         onToggle: (slotIndex: number) => {
           if (isBusy) return;
-          toggle.mutate({ characterId, slotLevel: zoom.lvl, slotIndex });
+          toggle.mutate({
+            characterId,
+            slotLevel: zoom.lvl,
+            slotIndex,
+            isPact: false,
+          });
         },
       };
     }
@@ -234,7 +250,12 @@ export function PreparedSpellList({
       spent,
       onToggle: (slotIndex: number) => {
         if (isBusy) return;
-        toggle.mutate({ characterId, slotLevel: zoom.lvl, slotIndex });
+        toggle.mutate({
+          characterId,
+          slotLevel: zoom.lvl,
+          slotIndex,
+          isPact: false,
+        });
       },
     };
   }, [zoom, slots, toggle, characterId, isBusy]);

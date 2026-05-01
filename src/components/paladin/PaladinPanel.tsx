@@ -93,10 +93,10 @@ export function PaladinPanel({ characterId, characterLevel }: Props) {
     openCastSpellModal({
       spell: smiteSpell,
       slots,
-      onPick: (slotLevel, slotIndex) => {
+      onPick: (slotLevel, slotIndex, isPact) => {
         if (slotLevel === 0) return;
         toggle.mutate(
-          { characterId, slotLevel, slotIndex },
+          { characterId, slotLevel, slotIndex, isPact },
           {
             onError: () => {
               notifications.show({

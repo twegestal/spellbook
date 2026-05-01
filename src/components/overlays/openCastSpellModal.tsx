@@ -104,13 +104,13 @@ function buildCastOptions(slots: any, spellLevel: number): CastOption[] {
 export function openCastSpellModal(params: {
   spell: Spell;
   slots: any;
-  onPick: (slotLevel: number, slotIndex: number) => void;
+  onPick: (slotLevel: number, slotIndex: number, isPact: boolean) => void;
 }) {
   const { spell, slots, onPick } = params;
   const spellLevel = spell.level ?? 0;
 
   if (spellLevel === 0) {
-    onPick(0, 0);
+    onPick(0, 0, false);
     return;
   }
 
@@ -134,7 +134,7 @@ export function openCastSpellModal(params: {
                 variant="outline"
                 fullWidth
                 onClick={() => {
-                  onPick(opt.level, opt.nextIndex);
+                  onPick(opt.level, opt.nextIndex, opt.isPact ?? false);
                   modals.close(id);
                 }}
               >

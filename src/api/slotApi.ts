@@ -21,6 +21,7 @@ export const slotsApi = (apiClient: typeof ky) => ({
     slotIndex: number;
     spellId?: string;
     note?: string;
+    isPact?: boolean;
   }) =>
     apiClient
       .post(`slots/${body.characterId}/slots/toggle`, {
@@ -29,6 +30,7 @@ export const slotsApi = (apiClient: typeof ky) => ({
           slotIndex: body.slotIndex,
           spellId: body.spellId ?? null,
           note: body.note ?? null,
+          isPact: body.isPact ?? false,
         },
       })
       .json<{
