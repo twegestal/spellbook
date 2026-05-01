@@ -7,6 +7,7 @@ type CastOption = {
   remaining: number;
   maximum: number;
   nextIndex: number;
+  isPact?: boolean;
 };
 
 function buildCastOptions(slots: any, spellLevel: number): CastOption[] {
@@ -16,7 +17,15 @@ function buildCastOptions(slots: any, spellLevel: number): CastOption[] {
     const { slotLevel, remaining, maximum } = slots;
     if (remaining > 0) {
       const spent = maximum - remaining;
-      return [{ level: slotLevel, remaining, maximum, nextIndex: spent + 1 }];
+      return [
+        {
+          level: slotLevel,
+          remaining,
+          maximum,
+          nextIndex: spent + 1,
+          isPact: true,
+        },
+      ];
     }
     return [];
   }
@@ -32,10 +41,10 @@ function buildCastOptions(slots: any, spellLevel: number): CastOption[] {
         remaining,
         maximum,
         nextIndex: spent + 1,
+        isPact: true,
       });
     }
 
-    // Vanliga slots — bara om spell level matchar
     const byLevel = slots.byLevel ?? {};
     const levels = Object.keys(byLevel)
       .map(Number)
@@ -51,6 +60,7 @@ function buildCastOptions(slots: any, spellLevel: number): CastOption[] {
           remaining: row.remaining,
           maximum: row.maximum,
           nextIndex: spent + 1,
+          isPact: false,
         });
       }
     }
@@ -84,6 +94,7 @@ function buildCastOptions(slots: any, spellLevel: number): CastOption[] {
         remaining: row.remaining,
         maximum: row.maximum,
         nextIndex: spent + 1,
+        isPact: false,
       });
     }
   }
@@ -119,7 +130,7 @@ export function openCastSpellModal(params: {
           <Stack gap="xs">
             {options.map((opt) => (
               <Button
-                key={opt.level}
+                key={`${opt.isPact ? 'pact' : 'regular'}-${opt.level}-${opt.nextIndex}`}
                 variant="outline"
                 fullWidth
                 onClick={() => {
@@ -128,7 +139,14 @@ export function openCastSpellModal(params: {
                 }}
               >
                 <Group justify="space-between" w="100%" wrap="nowrap">
-                  <Text>Level {opt.level}</Text>
+                  <Group gap="xs">
+                    <Text>Level {opt.level}</Text>
+                    {opt.isPact && (
+                      <Badge size="sm" color="violet" variant="filled">
+                        Pact
+                      </Badge>
+                    )}
+                  </Group>
                   <Box>
                     <Badge variant="light">
                       {opt.remaining}/{opt.maximum} remaining

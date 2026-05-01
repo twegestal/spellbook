@@ -18,6 +18,8 @@ type Props = {
   isSorcerer?: boolean;
 };
 
+type ZoomTarget = { lvl: number; isPact: boolean };
+
 export function PreparedSpellList({
   characterId,
   spells,
@@ -28,7 +30,7 @@ export function PreparedSpellList({
   const toggle = useToggleSpellSlot();
   const isBusy = toggle.isPending;
 
-  const [zoom, setZoom] = useState<null | { lvl: number }>(null);
+  const [zoom, setZoom] = useState<ZoomTarget | null>(null);
   const closeZoom = useCallback(() => setZoom(null), []);
 
   if (!spells.length) {
@@ -55,12 +57,9 @@ export function PreparedSpellList({
       onPick: (slotLevel, slotIndex) => {
         if (slotLevel === 0) {
           const damage = spell.damage_type_name?.toLowerCase?.();
-          if (damage) {
-            spawnDamageBlast(damage as DamageType);
-          }
+          if (damage) spawnDamageBlast(damage as DamageType);
           return;
         }
-
         if (isBusy) return;
         toggle.mutate(
           { characterId, slotLevel, slotIndex },
@@ -74,9 +73,7 @@ export function PreparedSpellList({
             },
             onSuccess: () => {
               const damage = spell.damage_type_name?.toLowerCase?.();
-              if (damage) {
-                spawnDamageBlast(damage as DamageType);
-              }
+              if (damage) spawnDamageBlast(damage as DamageType);
             },
           },
         );
@@ -98,53 +95,85 @@ export function PreparedSpellList({
     .map(Number)
     .sort((a, b) => a - b);
 
-  const renderDots = (lvl: number) => {
+  const renderRegularDots = (lvl: number) => {
     if (!slots || lvl === 0) return null;
 
     if (slots.kind === 'pact') {
       if (lvl !== slots.slotLevel) return null;
       const max = slots.maximum;
       const spent = max - slots.remaining;
-
       return (
         <Group gap={4}>
-          {Array.from({ length: max }, (_, i) => {
-            const isSpent = i < spent;
-            return (
-              <SlotDot
-                key={i}
-                isSpent={isSpent}
-                disabled={isBusy}
-                onClick={() => {
-                  if (!isBusy) setZoom({ lvl });
-                }}
-              />
-            );
-          })}
+          {Array.from({ length: max }, (_, i) => (
+            <SlotDot
+              key={i}
+              isSpent={i < spent}
+              disabled={isBusy}
+              onClick={() => {
+                if (!isBusy) setZoom({ lvl, isPact: false });
+              }}
+            />
+          ))}
+        </Group>
+      );
+    }
+
+    if (slots.kind === 'multiclass') {
+      const row = slots.byLevel[lvl];
+      if (!row) return null;
+      const spent = row.maximum - row.remaining;
+      return (
+        <Group gap={4}>
+          {Array.from({ length: row.maximum }, (_, i) => (
+            <SlotDot
+              key={i}
+              isSpent={i < spent}
+              disabled={isBusy}
+              onClick={() => {
+                if (!isBusy) setZoom({ lvl, isPact: false });
+              }}
+            />
+          ))}
         </Group>
       );
     }
 
     const row = slots.byLevel[lvl];
     if (!row) return null;
-    const max = row.maximum;
-    const spent = max - row.remaining;
-
+    const spent = row.maximum - row.remaining;
     return (
       <Group gap={4}>
-        {Array.from({ length: max }, (_, i) => {
-          const isSpent = i < spent;
-          return (
-            <SlotDot
-              key={i}
-              isSpent={isSpent}
-              disabled={isBusy}
-              onClick={() => {
-                if (!isBusy) setZoom({ lvl });
-              }}
-            />
-          );
-        })}
+        {Array.from({ length: row.maximum }, (_, i) => (
+          <SlotDot
+            key={i}
+            isSpent={i < spent}
+            disabled={isBusy}
+            onClick={() => {
+              if (!isBusy) setZoom({ lvl, isPact: false });
+            }}
+          />
+        ))}
+      </Group>
+    );
+  };
+
+  const renderPactDots = () => {
+    if (slots?.kind !== 'multiclass') return null;
+    const { slotLevel, maximum, remaining } = slots.pact;
+    const spent = maximum - remaining;
+    return (
+      <Group gap={4}>
+        {Array.from({ length: maximum }, (_, i) => (
+          <SlotDot
+            key={i}
+            isSpent={i < spent}
+            disabled={isBusy}
+            color="violet"
+            onClick={() => {
+              if (!isBusy) setZoom({ lvl: slotLevel, isPact: true });
+            }}
+          />
+        ))}
       </Group>
     );
   };
@@ -153,10 +182,8 @@ export function PreparedSpellList({
     if (!zoom || !slots) return null;
 
     if (slots.kind === 'pact') {
-      if (zoom.lvl !== slots.slotLevel) return null;
       const maximum = slots.maximum;
       const spent = maximum - slots.remaining;
-
       return {
         levelLabel: `Pact Slots (Lvl ${slots.slotLevel})`,
         maximum,
@@ -168,12 +195,39 @@ export function PreparedSpellList({
       };
     }
 
+    if (slots.kind === 'multiclass') {
+      if (zoom.isPact) {
+        const maximum = slots.pact.maximum;
+        const spent = maximum - slots.pact.remaining;
+        return {
+          levelLabel: `Pact Slots (Lvl ${slots.pact.slotLevel})`,
+          maximum,
+          spent,
+          onToggle: (slotIndex: number) => {
+            if (isBusy) return;
+            toggle.mutate({ characterId, slotLevel: zoom.lvl, slotIndex });
+          },
+        };
+      }
+      const row = slots.byLevel[zoom.lvl];
+      if (!row) return null;
+      const maximum = row.maximum;
+      const spent = maximum - row.remaining;
+      return {
+        levelLabel: `Level ${zoom.lvl}`,
+        maximum,
+        spent,
+        onToggle: (slotIndex: number) => {
+          if (isBusy) return;
+          toggle.mutate({ characterId, slotLevel: zoom.lvl, slotIndex });
+        },
+      };
+    }
+
     const row = slots.byLevel[zoom.lvl];
     if (!row) return null;
-
     const maximum = row.maximum;
     const spent = maximum - row.remaining;
-
     return {
       levelLabel: `Level ${zoom.lvl}`,
       maximum,
@@ -183,7 +237,12 @@ export function PreparedSpellList({
         toggle.mutate({ characterId, slotLevel: zoom.lvl, slotIndex });
       },
     };
-  }, [zoom, slots, toggle, characterId]);
+  }, [zoom, slots, toggle, characterId, isBusy]);
+
+  // Visa pact-raden överst om multiclass
+  const showPactRow = slots?.kind === 'multiclass';
+  const pactSlotLevel =
+    slots?.kind === 'multiclass' ? slots.pact.slotLevel : null;
 
   return (
     <>
@@ -192,13 +251,25 @@ export function PreparedSpellList({
         gap="md"
         style={{ listStyle: 'none', padding: 0, margin: 0 }}
       >
+        {/* Separat rad för pact slots vid multiclass */}
+        {showPactRow && (
+          <Stack gap="xs">
+            <Group justify="space-between" align="center">
+              <Text fz="xs" tt="uppercase" c="violet" fw={600}>
+                Pact Magic (Lvl {pactSlotLevel})
+              </Text>
+              {renderPactDots()}
+            </Group>
+          </Stack>
+        )}
+
         {sortedLevels.map((lvl) => (
           <Stack key={lvl} gap="xs">
             <Group justify="space-between" align="center">
               <Text fz="xs" tt="uppercase" c="dimmed" fw={600}>
                 {lvl === 0 ? 'Cantrips' : `Level ${lvl}`}
               </Text>
-              {renderDots(lvl)}
+              {renderRegularDots(lvl)}
             </Group>
 
             <Stack gap="sm">
